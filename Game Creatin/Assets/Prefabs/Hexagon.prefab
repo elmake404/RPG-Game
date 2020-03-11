@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1900745699416693023}
   - component: {fileID: 1900745699416693020}
   - component: {fileID: 93972637663908351}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Hexagon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -75,4 +75,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dad6645ce3b92348a10b70fda36daa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _flag: {fileID: 977971286727681247, guid: 057f4a2ee177235428f92a64600f78f8, type: 3}
   TypeHexagon: 0

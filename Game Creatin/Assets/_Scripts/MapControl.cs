@@ -5,22 +5,22 @@ using UnityEngine;
 public class MapControl : MonoBehaviour
 {
     [SerializeField]
-    private Transform[] hexagons; 
+    private Transform[] hexagons;
+    [SerializeField]
+    private GameObject game;
 
-    void Start()
+    void Awake()
     {
+        MapControlStatic.Flag = game;
         for (int i = 0; i < hexagons.Length; i++)
         {
+            hexagons[i].name = i.ToString();
             for (int j = 0; j < hexagons[i].childCount; j++)
             {
-               MapControlStatic.mapNav[i, j] = hexagons[i].GetChild(j).GetComponent<HexagonControl>().TypeHexagon;
-                //if (hexagons[i].GetChild(j).GetComponent<HexagonControl>().TypeHexagon==1)
-                //{
-                //    Debug.Log(i+ " " + j);
-                //}
+               MapControlStatic.mapNav[i, j] = hexagons[i].GetChild(j).GetComponent<HexagonControl>();
+                hexagons[i].GetChild(j).name = j.ToString();
             }
         }
-        //Debug.Log(MapControlStatic.mapNav[2, 5]);
     }
 
     void Update()

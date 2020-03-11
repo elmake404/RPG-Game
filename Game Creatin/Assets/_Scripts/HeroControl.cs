@@ -27,8 +27,4 @@ public class HeroControl : MonoBehaviour
             yield return new WaitForSeconds(0.02f);
         }
     }
-    private void OnMouseDown()
-    {
-        Debug.Log(1);
-    }
 }
