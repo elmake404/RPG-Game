@@ -11,7 +11,6 @@ public class MapControl : MonoBehaviour
 
     void Awake()
     {
-        MapControlStatic.Flag = game;
         for (int i = 0; i < hexagons.Length; i++)
         {
             hexagons[i].name = i.ToString();
