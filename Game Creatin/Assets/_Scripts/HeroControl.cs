@@ -7,7 +7,7 @@ public class HeroControl : MonoBehaviour
     private List<HexagonControl> _listWay = new List<HexagonControl>();    //список содержащий кротчай ший путь 
     private List<HexagonControl> _listDeadlock = new List<HexagonControl>();    //список содержащий информацию про тупик 
     public List<HexagonControl> ListPoint = new List<HexagonControl>();    //список вершин по которым надо проййтись 
-
+    private int _oldRow,_oldColunm;
 
 
     [SerializeField]
@@ -30,11 +30,11 @@ public class HeroControl : MonoBehaviour
         List<HexagonControl> ListPos = new List<HexagonControl>();
         ListPos.AddRange(_listWay);
         _listWay.Clear();
-        Debug.Log(ListPos.Count);
+        //Debug.Log(ListPos.Count);
 
         while (ListPos.Count > 0)
         {
-            Debug.Log(ListPos[0].transform.position);
+            //Debug.Log(ListPos[0].transform.position);
             transform.position = Vector2.MoveTowards(transform.position, ListPos[0].transform.position, _speed);
             if ((ListPos[0].transform.position - transform.position).magnitude <= 3.7f)
             {
@@ -87,14 +87,25 @@ public class HeroControl : MonoBehaviour
             {
                 if (Magnitude > (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude)
                 {
-                    Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
-                    hexagonControl = hexagons[i];
+                    if ((hexagons[i].Row == _oldRow && hexagons[i].Column == _oldColunm))
+                    {
+                        int iNew = AnotherWay(hexagons, i);
+                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[iNew].transform.position).magnitude;
+                        hexagonControl = hexagons[iNew];
+                    }
+                    else
+                    {
+                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        hexagonControl = hexagons[i];
+                    }
                 }
             }
         }
 
         if (hexagonControl != null)
         {
+            _oldRow = _listWay[_listWay.Count - 1].Row;
+            _oldColunm = _listWay[_listWay.Count - 1].Column;
             _listWay.Add(hexagonControl);
 
             if (MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column] != MapControlStatic.mapNav[ListPoint[ListPoint.Count - 1].Row, ListPoint[ListPoint.Count - 1].Column])
@@ -121,10 +132,25 @@ public class HeroControl : MonoBehaviour
         }
         else
         {
-            //Debug.Log(_listWay[_listWay.Count - 1].Row + " " + _listWay[_listWay.Count - 1].Column);
+            //Debug.Log(_listWay[_listWay.Count - 1].Row + " " + (_listWay[_listWay.Count - 1].Column-1));
 
-            _listDeadlock.Add(MapControlStatic.mapNav[_listWay[_listWay.Count - 1].Row, _listWay[_listWay.Count - 1].Column - 1]);
-            BreakingTheDeadlock(_listWay[_listWay.Count - 1].Row, _listWay[_listWay.Count - 1].Column - 1);
+            for (int i = 0; i < hexagons.Count; i++)
+            {
+                if (hexagons[i].TypeHexagon == 1)
+                {
+                    if (Magnitude > (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude)
+                    {
+                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        hexagonControl = hexagons[i];
+                    }
+                }
+            }
+
+            //Debug.Log("new "+hexagonControl.Row + " " + hexagonControl.Column);
+            //_listDeadlock.Add(MapControlStatic.mapNav[_listWay[_listWay.Count - 1].Row, _listWay[_listWay.Count - 1].Column-1]);
+            //BreakingTheDeadlock(_listWay[_listWay.Count - 1].Row, _listWay[_listWay.Count - 1].Column - 1);
+            _listDeadlock.Add(MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column]);
+            BreakingTheDeadlock(hexagonControl.Row, hexagonControl.Column);
         }
     }
 
@@ -231,6 +257,31 @@ public class HeroControl : MonoBehaviour
             SearchForAWay(Row, Column);
             _listDeadlock.Clear();
         }
+    }
+    private int AnotherWay(List<HexagonControl> hexagons, int I)
+    {
+        float Magnitude = 0;
+        int index = 0;
+        for (int i = 0; i < hexagons.Count; i++)
+        {
+            if (i != I)
+            {
+                if (hexagons[i].TypeHexagon != 1)
+                {
+                    if (Magnitude == 0)
+                    {
+                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        index = i;
+                    }
+                    if (Magnitude > (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude)
+                    {
+                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        index = i;
+                    }
+                }
+            }
+        }
+        return index;
     }
 
 }
