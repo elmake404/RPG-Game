@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class HeroControl : MonoBehaviour
 {
+    private IEnumerator MoveCorotine;
+
     private List<HexagonControl> _listWay = new List<HexagonControl>();    //список содержащий кротчай ший путь 
     private List<HexagonControl> _listDeadlock = new List<HexagonControl>();    //список содержащий информацию про тупик 
-    public List<HexagonControl> ListPoint = new List<HexagonControl>();    //список вершин по которым надо проййтись 
-    private int _oldRow,_oldColunm;
+    public List<HexagonControl> ListPoint = new List<HexagonControl>();   //список вершин по которым надо проййтись 
+    private List<HexagonControl> _listProvenHexagons = new List<HexagonControl>();
+    private int _oldRow, _oldColunm;
+    private int _namberPoint;
 
 
     [SerializeField]
@@ -18,23 +22,26 @@ public class HeroControl : MonoBehaviour
 
     void Start()
     {
-
+        MoveCorotine = Movement();
     }
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log(1);
+        }
 
     }
     private IEnumerator Movement()
     {
+
         List<HexagonControl> ListPos = new List<HexagonControl>();
         ListPos.AddRange(_listWay);
         _listWay.Clear();
-        //Debug.Log(ListPos.Count);
 
         while (ListPos.Count > 0)
         {
-            //Debug.Log(ListPos[0].transform.position);
             transform.position = Vector2.MoveTowards(transform.position, ListPos[0].transform.position, _speed);
             if ((ListPos[0].transform.position - transform.position).magnitude <= 3.7f)
             {
@@ -46,6 +53,7 @@ public class HeroControl : MonoBehaviour
             yield return new WaitForSeconds(0.02f);
         }
     }
+
     public void SearchForAWay(int _row, int _column)    //метод писка пути 
     {
         if (_listWay.Count < 1)
@@ -54,8 +62,12 @@ public class HeroControl : MonoBehaviour
         }
 
         List<HexagonControl> hexagons = new List<HexagonControl>();// список всех соседей 6-ти угольника
+        if (ListPoint.Count < 1)
+        {
+            return;
+        }
         float Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - MapControlStatic.mapNav[_row, _column].transform.position).magnitude;
-        int _columbias = (_row % 2) == 0 ? 1 : -1;
+        int _columBias = (_row % 2) == 0 ? 1 : -1;
         HexagonControl hexagonControl = null;//нужный 6-ти угольник  
 
         #region AddToListHeighbors
@@ -69,15 +81,15 @@ public class HeroControl : MonoBehaviour
         {
             hexagons.Add(MapControlStatic.mapNav[_row + 1, _column]);
 
-            if (_column + _columbias > 0 && _column + _columbias < MapControlStatic.mapNav.GetLength(1) - 1)
-                hexagons.Add(MapControlStatic.mapNav[_row + 1, _column + _columbias]);
+            if (_column + _columBias > 0 && _column + _columBias < MapControlStatic.mapNav.GetLength(1) - 1)
+                hexagons.Add(MapControlStatic.mapNav[_row + 1, _column + _columBias]);
         }
 
         if (_row > 0)
         {
             hexagons.Add(MapControlStatic.mapNav[_row - 1, _column]);
-            if (_column + _columbias > 0 && _column + _columbias < MapControlStatic.mapNav.GetLength(1) - 1)
-                hexagons.Add(MapControlStatic.mapNav[_row - 1, _column + _columbias]);
+            if (_column + _columBias > 0 && _column + _columBias < MapControlStatic.mapNav.GetLength(1) - 1)
+                hexagons.Add(MapControlStatic.mapNav[_row - 1, _column + _columBias]);
         }
         #endregion
 
@@ -119,21 +131,17 @@ public class HeroControl : MonoBehaviour
             }
             else
             {
+                StopCoroutine(MoveCorotine);
+
                 _listWay.Reverse();
-                StartCoroutine(Movement());
+                MoveCorotine = Movement();
+                StartCoroutine(MoveCorotine);
 
                 ListPoint.Clear();
-
-                //for (int i = 0; i < _listWay.Count; i++)
-                //{
-                //    _listWay[i].Flag();
-                //}
             }
         }
         else
         {
-            //Debug.Log(_listWay[_listWay.Count - 1].Row + " " + (_listWay[_listWay.Count - 1].Column-1));
-
             for (int i = 0; i < hexagons.Count; i++)
             {
                 if (hexagons[i].TypeHexagon == 1)
@@ -146,9 +154,6 @@ public class HeroControl : MonoBehaviour
                 }
             }
 
-            //Debug.Log("new "+hexagonControl.Row + " " + hexagonControl.Column);
-            //_listDeadlock.Add(MapControlStatic.mapNav[_listWay[_listWay.Count - 1].Row, _listWay[_listWay.Count - 1].Column-1]);
-            //BreakingTheDeadlock(_listWay[_listWay.Count - 1].Row, _listWay[_listWay.Count - 1].Column - 1);
             _listDeadlock.Add(MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column]);
             BreakingTheDeadlock(hexagonControl.Row, hexagonControl.Column);
         }
@@ -157,7 +162,7 @@ public class HeroControl : MonoBehaviour
     private void BreakingTheDeadlock(int row, int column)    //метод писка выхода из тупика  
     {
         List<HexagonControl> hexagonsDeadlock = new List<HexagonControl>();
-        int _columbias = (row % 2) == 0 ? 1 : -1;
+        int _columBias = (row % 2) == 0 ? 1 : -1;
         float Magnitude = 0;
         HexagonControl hexagonControl = null;
 
@@ -172,15 +177,15 @@ public class HeroControl : MonoBehaviour
         {
             hexagonsDeadlock.Add(MapControlStatic.mapNav[row + 1, column]);
 
-            if (column + _columbias > 0 && column + _columbias < MapControlStatic.mapNav.GetLength(1) - 1)
-                hexagonsDeadlock.Add(MapControlStatic.mapNav[row + 1, column + _columbias]);
+            if (column + _columBias > 0 && column + _columBias < MapControlStatic.mapNav.GetLength(1) - 1)
+                hexagonsDeadlock.Add(MapControlStatic.mapNav[row + 1, column + _columBias]);
         }
 
         if (row > 0)
         {
             hexagonsDeadlock.Add(MapControlStatic.mapNav[row - 1, column]);
-            if (column + _columbias > 0 && column + _columbias < MapControlStatic.mapNav.GetLength(1) - 1)
-                hexagonsDeadlock.Add(MapControlStatic.mapNav[row - 1, column + _columbias]);
+            if (column + _columBias > 0 && column + _columBias < MapControlStatic.mapNav.GetLength(1) - 1)
+                hexagonsDeadlock.Add(MapControlStatic.mapNav[row - 1, column + _columBias]);
         }
         #endregion
 
@@ -198,6 +203,21 @@ public class HeroControl : MonoBehaviour
             }
         }
 
+        if (_listProvenHexagons.Count > 0)
+        {
+            for (int i = 0; i < _listProvenHexagons.Count; i++)
+            {
+                for (int j = 0; j < hexagonsDeadlock.Count; j++)
+                {
+                    if (MapControlStatic.mapNav[hexagonsDeadlock[j].Row, hexagonsDeadlock[j].Column] == MapControlStatic.mapNav[_listProvenHexagons[i].Row, _listProvenHexagons[i].Column])
+                    {
+
+                        hexagonsDeadlock.Remove(hexagonsDeadlock[j]);
+                    }
+                }
+            }
+        }
+        _listProvenHexagons.AddRange(hexagonsDeadlock);
 
         for (int i = 0; i < hexagonsDeadlock.Count; i++)
         {
@@ -205,13 +225,13 @@ public class HeroControl : MonoBehaviour
             {
                 if (hexagonControl == null)
                 {
-                    Magnitude = (ListPoint[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude;
+                    Magnitude = (_listWay[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude;
                     hexagonControl = hexagonsDeadlock[i];
                 }
 
-                if (Magnitude > (ListPoint[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude)
+                if (Magnitude > (_listWay[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude)
                 {
-                    Magnitude = (ListPoint[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude;
+                    Magnitude = (_listWay[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude;
                     hexagonControl = hexagonsDeadlock[i];
                 }
             }
@@ -225,34 +245,34 @@ public class HeroControl : MonoBehaviour
         }
         else if (hexagonControl == null && (row == 0))
         {
+            _listProvenHexagons.Clear();
             BreakingTheDeadlock(_listDeadlock[0].Row, _listDeadlock[0].Column);
         }
         else if (hexagonControl == null && (row != 0))
         {
-            int way = (row < _listDeadlock[0].Row) ? -1 : 1;
-            for (int i = 0; i < hexagonsDeadlock.Count; i++)
-            {
-                if (hexagonsDeadlock[i].TypeHexagon != 1 && (hexagonsDeadlock[i].Row == row + way))
-                {
-                    if (hexagonControl == null)
-                    {
-                        Magnitude = (ListPoint[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude;
-                        hexagonControl = hexagonsDeadlock[i];
-                    }
+            int RowWay;
+            int ColumnWay;
 
-                    if (Magnitude > (ListPoint[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude)
-                    {
-                        Magnitude = (ListPoint[0].transform.position - hexagonsDeadlock[i].transform.position).magnitude;
-                        hexagonControl = hexagonsDeadlock[i];
-                    }
-                }
+            if (_listDeadlock[_listDeadlock.Count - 2].Row != row)
+            {
+                int _columType = (row % 2) == 0 ? 1 : -1;
+                RowWay = row - _listDeadlock[_listDeadlock.Count - 2].Row;
+                ColumnWay = column - _listDeadlock[_listDeadlock.Count - 2].Column + _columType;
+            }
+            else
+            {
+                RowWay = row - _listDeadlock[_listDeadlock.Count - 2].Row;
+                ColumnWay = column - _listDeadlock[_listDeadlock.Count - 2].Column;
             }
 
-            ListPoint.Add(MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column]);
+            hexagonControl = MapControlStatic.mapNav[(row + RowWay), (column + ColumnWay)];
 
+            ListPoint.Add(MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column]);
+            //ListPoint[ListPoint.Count - 1].Flag();
             int Row = _listWay[0].Row;
             int Column = _listWay[0].Column;
 
+            _listProvenHexagons.Clear();
             _listWay.Clear();
             SearchForAWay(Row, Column);
             _listDeadlock.Clear();
@@ -282,6 +302,15 @@ public class HeroControl : MonoBehaviour
             }
         }
         return index;
+    }
+
+    private void AddListPoint(HexagonControl hexagon)
+    {
+        _listWay.Clear();
+        _listDeadlock.Clear();
+        _listProvenHexagons.Clear();
+        ListPoint.Clear();
+        ListPoint.Add(hexagon);
     }
 
 }
