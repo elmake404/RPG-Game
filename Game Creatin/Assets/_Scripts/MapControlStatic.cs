@@ -10,8 +10,9 @@ public static class MapControlStatic
     public static List<HexagonControl> ListPoint = new List<HexagonControl>();    //список вершин по которым надо проййтись 
     private static List<HexagonControl> _listProvenHexagons = new List<HexagonControl>();
     private static List<HexagonControl> PassedPoints = new List<HexagonControl>();
+    private static List<HexagonControl> PossibleoWrkaround = new List<HexagonControl>();
     private static int _oldRow = 3, _oldColunm = 10;
-    private static int _namberPoint;
+    private static int _namberPoint, _numberOfPaths, _numberOfPathsSelect;
 
 
     public static void SearchForAWay(int _row, int _column)    //метод писка пути 
@@ -80,26 +81,25 @@ public static class MapControlStatic
 
             if (mapNav[hexagonControl.Row, hexagonControl.Column] != mapNav[ListPoint[_namberPoint].Row, ListPoint[_namberPoint].Column])
             {
+
                 SearchForAWay(hexagonControl.Row, hexagonControl.Column);
             }
             else if (_namberPoint > 0)
             {
-                //for (int i = 0; i < _listWay.Count; i++)
-                //{
-                //    _listWay[i].Flag();
-                //}
-                //Debug.Log("1 " + hexagonControl.Row + " " + hexagonControl.Column);
-                //ListPoint.Remove(ListPoint[ListPoint.Count - 1]);
-                _namberPoint = _namberPoint = PointSelection(hexagonControl.Row, hexagonControl.Column);
 
+                _namberPoint = PointSelection(hexagonControl.Row, hexagonControl.Column);
                 SearchForAWay(hexagonControl.Row, hexagonControl.Column);
             }
             else
             {
-                for (int i = 0; i < _listWay.Count; i++)
+                for (int i = 0; i < ListPoint.Count; i++)
                 {
-                    _listWay[i].Flag();
+                    ListPoint[i].Flag();
                 }
+                //for (int i = 0; i < _listWay.Count; i++)
+                //{
+                //    _listWay[i].Flag();
+                //}
             }
         }
         else
@@ -120,9 +120,10 @@ public static class MapControlStatic
                 }
             }
 
-            if (ListPoint.Count >= 4)
+            if (ListPoint.Count >= 5)
             {
                 //hexagonControl.Flag();
+
                 for (int i = 0; i < _listWay.Count; i++)
                 {
                     _listWay[i].Flag();
@@ -134,8 +135,14 @@ public static class MapControlStatic
                     Debug.Log(ListPoint[i].Row + " " + (ListPoint[i].Column));
 
                 }
-                Debug.LogError("namberPoint " + ListPoint[_namberPoint].Row + " " + (ListPoint[_namberPoint].Column));
+                Debug.Log("namberPoint " + ListPoint[_namberPoint].Row + " " + (ListPoint[_namberPoint].Column));
+                Debug.Log("Lisr" + _listWay.Count);
 
+            }
+
+            if ((ListPoint.Count >= 10) || (ListPoint.Count >= 4 && _listWay.Count <= 4))
+            {
+                Debug.LogError(ListPoint.Count);
                 return;
             }
             if (hexagonControl == null)
@@ -143,8 +150,12 @@ public static class MapControlStatic
                 Debug.Log(ListPoint.Count);
             }
             _listDeadlock.Add(MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column]);
-            //MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column].Flag();
+            MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column].Flag();
+            _numberOfPaths = NumberOfWorkarounds(hexagonControl.Row, hexagonControl.Column);
+            _numberOfPathsSelect = _numberOfPaths;
+
             BreakingTheDeadlock(hexagonControl.Row, hexagonControl.Column);
+
         }
     }
 
@@ -208,7 +219,10 @@ public static class MapControlStatic
                 }
             }
         }
-        _listProvenHexagons.AddRange(hexagonsDeadlock);
+        if (_listDeadlock.Count > 1)
+        {
+            _listProvenHexagons.AddRange(hexagonsDeadlock);
+        }
 
         for (int i = 0; i < hexagonsDeadlock.Count; i++)
         {
@@ -233,13 +247,13 @@ public static class MapControlStatic
 
             _listDeadlock.Add(hexagonControl);
             //Debug.Log(hexagonControl.Row + " " + hexagonControl.Column);
-            //hexagonControl.Flag();
+            hexagonControl.Flag();
             BreakingTheDeadlock(hexagonControl.Row, hexagonControl.Column);
         }
         else if (hexagonControl == null && (row == 0 || column == 0))
         {
             //mapNav[_listDeadlock[0].Row, _listDeadlock[0].Column].Flag();
-            _listProvenHexagons.Clear();
+            //_listProvenHexagons.Clear();
             BreakingTheDeadlock(_listDeadlock[0].Row, _listDeadlock[0].Column);
         }
         else if (hexagonControl == null && (row != 0 || column != 0))
@@ -249,35 +263,48 @@ public static class MapControlStatic
             //Debug.Log("1 " + _listDeadlock[_listDeadlock.Count - 2].Row + " " + _listDeadlock[_listDeadlock.Count - 2].Column);
             //Debug.Log("2 " + row + " " + column);
 
-            int RowWay;
-            int ColumnWay;
-            if (_listDeadlock[_listDeadlock.Count - 2].Row != row)
+            if ((row != 0 || column != 0) && ((mapNav[row, column] != mapNav[_listDeadlock[0].Row, _listDeadlock[0].Column]) || (_numberOfPathsSelect == 1)))
             {
-                int _columType = (row % 2) == 0 ? 1 : -1;
-                RowWay = (row - _listDeadlock[_listDeadlock.Count - 2].Row) > 0 ? 1 : -1;
-                if (_listDeadlock[_listDeadlock.Count - 2].Column != column)
+                Debug.Log(_numberOfPathsSelect);
+
+                int RowWay;
+                int ColumnWay;
+                if (_listDeadlock[_listDeadlock.Count - 2].Row != row)
                 {
-                    ColumnWay = ((column - _listDeadlock[_listDeadlock.Count - 2].Column) > 0 ? 1 : -1) + _columType;
+                    int _columType = (row % 2) == 0 ? 1 : -1;
+                    RowWay = (row - _listDeadlock[_listDeadlock.Count - 2].Row) > 0 ? 1 : -1;
+                    if (_listDeadlock[_listDeadlock.Count - 2].Column != column)
+                    {
+                        ColumnWay = ((column - _listDeadlock[_listDeadlock.Count - 2].Column) > 0 ? 1 : -1) + _columType;
+                    }
+                    else
+                    {
+                        ColumnWay = _columType;
+                    }
                 }
                 else
                 {
-                    ColumnWay = _columType;
+                    RowWay = row - _listDeadlock[_listDeadlock.Count - 2].Row;
+                    ColumnWay = column - _listDeadlock[_listDeadlock.Count - 2].Column;
                 }
+
+                hexagonControl = MapControlStatic.mapNav[(row + RowWay), (column + ColumnWay)];
+
+                RepeatCheck(out hexagonControl, hexagonControl);
             }
-            else
-            {
-                RowWay = row - _listDeadlock[_listDeadlock.Count - 2].Row;
-                ColumnWay = column - _listDeadlock[_listDeadlock.Count - 2].Column;
-            }
-
-            hexagonControl = MapControlStatic.mapNav[(row + RowWay), (column + ColumnWay)];
-
-            RepeatCheck(out hexagonControl, hexagonControl);
-
+            //Cообщаем что тут тупик
+            // надо записать все возможные пути обхода и найти биижайший
             //Debug.Log(ListPoint.Count);
-
-            ListPoint.Add(MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column]);
-
+            if (_numberOfPaths > 0)
+            {
+                _numberOfPaths--;
+                PossibleoWrkaround.Add(hexagonControl);
+                BreakingTheDeadlock(_listDeadlock[0].Row, _listDeadlock[0].Column);
+                return;
+            }
+            HexagonControl hexagonPoint = FindingTheNearestPeak();
+            ListPoint.Add(MapControlStatic.mapNav[hexagonPoint.Row, hexagonPoint.Column]);
+            PassedPoints.Clear();
             //Debug.Log("Two" + hexagonControl.Row + " " + hexagonControl.Column);
 
             _listProvenHexagons.Clear();
@@ -286,6 +313,7 @@ public static class MapControlStatic
             //hexagonControl.Flag();
             _listWay.Clear();
             _listDeadlock.Clear();
+            PossibleoWrkaround.Clear();
             SearchForAWay(Row, Column);
         }
     }
@@ -380,53 +408,123 @@ public static class MapControlStatic
     {
         float Mag = 0;
         int I = 0;
-        if (PassedPoints.Count <= 0)
-        {
-            Debug.Log(1);
-            for (int i = 0; i < ListPoint.Count; i++)
-            {
-                if (Mag == 0)
-                {
-                    Mag = (mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - mapNav[row, column].transform.position).magnitude;
-                    I = i;
-                }
-                if ((mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - mapNav[row, column].transform.position).magnitude < Mag)
-                {
-                    Mag = (mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - mapNav[row, column].transform.position).magnitude;
-                    I = i;
-                }
-            }
-        }
-        else
-        {
-            Debug.Log(2);
+        int IPoint = 0;
+        List<HexagonControl> hexagonControls = new List<HexagonControl>();
+        hexagonControls.AddRange(ListPoint);
 
-            for (int i = 0; i < ListPoint.Count; i++)
+        if (PassedPoints.Count > 0)
+        {
+            for (int j = 0; j < PassedPoints.Count; j++)
             {
-                for (int j = 0; j < PassedPoints.Count; j++)
+                for (int i = 0; i < hexagonControls.Count; i++)
                 {
-                    if (mapNav[PassedPoints[j].Row, PassedPoints[j].Column] != mapNav[ListPoint[i].Row, ListPoint[i].Column])
+                    if (mapNav[PassedPoints[j].Row, PassedPoints[j].Column] == mapNav[hexagonControls[i].Row, hexagonControls[i].Column])
                     {
-                        if (Mag == 0)
-                        {
-                            Mag = (mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - mapNav[row, column].transform.position).magnitude;
-                            I = i;
-                        }
-                        if ((mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - mapNav[row, column].transform.position).magnitude != 0
-                            && ((mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - mapNav[row, column].transform.position).magnitude < Mag))
-                        {
-                            Mag = (mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - mapNav[row, column].transform.position).magnitude;
-                            I = i;
-                        }
-
+                        hexagonControls.Remove(hexagonControls[i]);
                     }
                 }
             }
         }
-        Debug.Log("Two" + ListPoint[I].Row + " " + ListPoint[I].Column);
+        if (hexagonControls.Count == 1)
+        {
+            I = 0;
+        }
+        else
+        {
+            hexagonControls.Remove(hexagonControls[0]);
+            for (int i = 0; i < hexagonControls.Count; i++)
+            {
+                if (Mag == 0)
+                {
+                    Mag = (mapNav[hexagonControls[i].Row, hexagonControls[i].Column].transform.position - mapNav[row, column].transform.position).magnitude;
+                    IPoint = i;
+                }
+                if ((mapNav[hexagonControls[i].Row, hexagonControls[i].Column].transform.position - mapNav[row, column].transform.position).magnitude < Mag)
+                {
+                    Mag = (mapNav[hexagonControls[i].Row, hexagonControls[i].Column].transform.position - mapNav[row, column].transform.position).magnitude;
+                    IPoint = i;
+                }
+            }
+
+            for (int i = 0; i < ListPoint.Count; i++)
+            {
+                if (mapNav[ListPoint[i].Row, ListPoint[i].Column] == mapNav[hexagonControls[IPoint].Row, hexagonControls[IPoint].Column])
+                {
+                    I = i;
+                }
+            }
+        }
+        if (hexagonControls.Count == 1)
+        {
+            //Debug.Log(I);
+        }
 
         PassedPoints.Add(ListPoint[I]);
 
         return I;
+    }
+    private static int NumberOfWorkarounds(int row, int column)
+    {
+        List<HexagonControl> hexagons = new List<HexagonControl>();
+        int _columBias = (row % 2) == 0 ? 1 : -1;
+        int neighbors = 0;
+        #region AddToList
+        if (column < mapNav.GetLength(1) - 1)
+            hexagons.Add(mapNav[row, column + 1]);
+
+        if (column > 0)
+            hexagons.Add(mapNav[row, column - 1]);
+
+        if (row < mapNav.GetLength(0) - 1)
+        {
+            hexagons.Add(mapNav[row + 1, column]);
+
+            if (column + _columBias > 0 && column + _columBias < mapNav.GetLength(1) - 1)
+                hexagons.Add(mapNav[row + 1, column + _columBias]);
+        }
+
+        if (row > 0)
+        {
+            hexagons.Add(mapNav[row - 1, column]);
+            if (column + _columBias > 0 && column + _columBias < mapNav.GetLength(1) - 1)
+                hexagons.Add(mapNav[row - 1, column + _columBias]);
+        }
+        #endregion
+        for (int i = 0; i < hexagons.Count; i++)
+        {
+            if (!hexagons[i].FreedomTest())
+            {
+                neighbors++;
+            }
+        }
+        return neighbors;
+    }
+    private static HexagonControl FindingTheNearestPeak()
+    {
+        HexagonControl hexagon = null;
+        float Magnitude = 0;
+
+        for (int i = 0; i < PossibleoWrkaround.Count; i++)
+        {
+            if (PossibleoWrkaround[i] != null)
+            {
+                if (hexagon == null)
+                {
+                    Magnitude = (_listWay[0].transform.position - PossibleoWrkaround[i].transform.position).magnitude;
+                    hexagon = PossibleoWrkaround[i];
+                }
+
+                if (Magnitude > (_listWay[0].transform.position - PossibleoWrkaround[i].transform.position).magnitude)
+                {
+                    Magnitude = (_listWay[0].transform.position - PossibleoWrkaround[i].transform.position).magnitude;
+                    hexagon = PossibleoWrkaround[i];
+                }
+            }
+            else
+            {
+                Debug.Log("rrrr");
+            }
+        }
+        return hexagon;
     }
 }

@@ -527,6 +527,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hero
       objectReference: {fileID: 0}
+    - target: {fileID: 1727449612580833919, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
+        type: 3}
+      propertyPath: m_TagString
+      value: Hero
+      objectReference: {fileID: 0}
     - target: {fileID: 5394098842759922982, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -685,12 +690,22 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3181149505298066615, guid: 417f0032036f2a94ea19fe46dfd070be,
+        type: 3}
+      propertyPath: TypeHexagon
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4452484583827850228, guid: 417f0032036f2a94ea19fe46dfd070be,
         type: 3}
       propertyPath: TypeHexagon
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5318606334862332923, guid: 417f0032036f2a94ea19fe46dfd070be,
+        type: 3}
+      propertyPath: TypeHexagon
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5336857752602654473, guid: 417f0032036f2a94ea19fe46dfd070be,
         type: 3}
       propertyPath: TypeHexagon
       value: 0

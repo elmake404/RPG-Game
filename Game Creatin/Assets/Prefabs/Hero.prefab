@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8699803935369676830}
   m_Layer: 8
   m_Name: Hero
-  m_TagString: Untagged
+  m_TagString: Hero
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -73,6 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50a7b54e4248ea1458fa5335b3d4595b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ListPoint: []
   _speed: 0.1
 --- !u!120 &5362344864849408997
 LineRenderer:

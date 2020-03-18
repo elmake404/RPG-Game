@@ -9,7 +9,7 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         _camera = Camera.main;
-        MapControlStatic.ListPoint.Add(MapControlStatic.mapNav[6, 5]);
+        MapControlStatic.ListPoint.Add(MapControlStatic.mapNav[4, 13]);
     }
 
     void Update()
@@ -19,10 +19,9 @@ public class PlayerControl : MonoBehaviour
             Collider2D Collider = Physics2D.OverlapPoint(_camera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -100)));
             if (Collider != null)
             {
-                if (Collider.gameObject.layer == 8)
+                if (Collider.gameObject.tag == "Hero")
                 {
                     _heroControl = Collider.gameObject.GetComponent<HeroControl>();
-                    _heroControl.AddListPoint(MapControlStatic.mapNav[_heroControl.HexagonRow, _heroControl.HexagonColumn]);
                 }
             }
         }
@@ -38,6 +37,7 @@ public class PlayerControl : MonoBehaviour
 
                     if (Collider.gameObject.layer == 9 && Hexagon.TypeHexagon != 1)
                     {
+                        _heroControl.AddListPoint(MapControlStatic.mapNav[_heroControl.HexagonRow, _heroControl.HexagonColumn]);
                         _heroControl.SearchForAWay(Hexagon.Row, Hexagon.Column);
                     }
                     else

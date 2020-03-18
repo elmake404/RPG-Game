@@ -28,13 +28,13 @@ public class HexagonControl : MonoBehaviour
     {
 
     }
-    //private void OnMouseDown()
-    //{
-    //    if (TypeHexagon != 1)
-    //    {
-    //        MapControlStatic.SearchForAWay(Row, Column);
-    //    }
-    //}
+    private void OnMouseDown()
+    {
+        if (TypeHexagon != 1)
+        {
+            MapControlStatic.SearchForAWay(Row, Column);
+        }
+    }
     public bool FreedomTest()
     {
         if (TypeHexagon==1||TypeHexagon==2)
