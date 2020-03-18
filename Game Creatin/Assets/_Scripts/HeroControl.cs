@@ -6,13 +6,16 @@ public class HeroControl : MonoBehaviour
 {
     private IEnumerator MoveCorotine;
 
+    #region 
     private List<HexagonControl> _listWay = new List<HexagonControl>();    //список содержащий кротчай ший путь 
     private List<HexagonControl> _listDeadlock = new List<HexagonControl>();    //список содержащий информацию про тупик 
-    public List<HexagonControl> ListPoint = new List<HexagonControl>();   //список вершин по которым надо проййтись 
     private List<HexagonControl> _listProvenHexagons = new List<HexagonControl>();
+    private List<HexagonControl> PassedPoints = new List<HexagonControl>();
+    public List<HexagonControl> ListPoint = new List<HexagonControl>();   //список вершин по которым надо проййтись 
+
     private int _oldRow, _oldColunm;
     private int _namberPoint;
-
+    #endregion
 
     [SerializeField]
     private float _speed;
@@ -59,6 +62,7 @@ public class HeroControl : MonoBehaviour
         if (_listWay.Count < 1)
         {
             _listWay.Add(MapControlStatic.mapNav[_row, _column]);
+            _namberPoint = PointSelection(_row, _column);
         }
 
         List<HexagonControl> hexagons = new List<HexagonControl>();// список всех соседей 6-ти угольника
@@ -66,7 +70,7 @@ public class HeroControl : MonoBehaviour
         {
             return;
         }
-        float Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - MapControlStatic.mapNav[_row, _column].transform.position).magnitude;
+        float Magnitude = (ListPoint[_namberPoint].transform.position - MapControlStatic.mapNav[_row, _column].transform.position).magnitude;
         int _columBias = (_row % 2) == 0 ? 1 : -1;
         HexagonControl hexagonControl = null;//нужный 6-ти угольник  
 
@@ -95,19 +99,19 @@ public class HeroControl : MonoBehaviour
 
         for (int i = 0; i < hexagons.Count; i++)
         {
-            if (hexagons[i].TypeHexagon != 1)
+            if (hexagons[i].FreedomTest())
             {
-                if (Magnitude > (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude)
+                if (Magnitude > (ListPoint[_namberPoint].transform.position - hexagons[i].transform.position).magnitude)
                 {
                     if ((hexagons[i].Row == _oldRow && hexagons[i].Column == _oldColunm))
                     {
                         int iNew = AnotherWay(hexagons, i);
-                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[iNew].transform.position).magnitude;
+                        Magnitude = (ListPoint[_namberPoint].transform.position - hexagons[iNew].transform.position).magnitude;
                         hexagonControl = hexagons[iNew];
                     }
                     else
                     {
-                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        Magnitude = (ListPoint[_namberPoint].transform.position - hexagons[i].transform.position).magnitude;
                         hexagonControl = hexagons[i];
                     }
                 }
@@ -120,13 +124,13 @@ public class HeroControl : MonoBehaviour
             _oldColunm = _listWay[_listWay.Count - 1].Column;
             _listWay.Add(hexagonControl);
 
-            if (MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column] != MapControlStatic.mapNav[ListPoint[ListPoint.Count - 1].Row, ListPoint[ListPoint.Count - 1].Column])
+            if (MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column] != MapControlStatic.mapNav[ListPoint[_namberPoint].Row, ListPoint[_namberPoint].Column])
             {
                 SearchForAWay(hexagonControl.Row, hexagonControl.Column);
             }
-            else if (ListPoint.Count > 1)
+            else if (_namberPoint > 0)
             {
-                ListPoint.Remove(ListPoint[ListPoint.Count - 1]);
+                _namberPoint = _namberPoint = PointSelection(hexagonControl.Row, hexagonControl.Column);
                 SearchForAWay(hexagonControl.Row, hexagonControl.Column);
             }
             else
@@ -144,11 +148,11 @@ public class HeroControl : MonoBehaviour
         {
             for (int i = 0; i < hexagons.Count; i++)
             {
-                if (hexagons[i].TypeHexagon == 1)
+                if (!hexagons[i].FreedomTest())
                 {
-                    if (Magnitude > (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude)
+                    if (Magnitude > (ListPoint[_namberPoint].transform.position - hexagons[i].transform.position).magnitude)
                     {
-                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        Magnitude = (ListPoint[_namberPoint].transform.position - hexagons[i].transform.position).magnitude;
                         hexagonControl = hexagons[i];
                     }
                 }
@@ -221,7 +225,7 @@ public class HeroControl : MonoBehaviour
 
         for (int i = 0; i < hexagonsDeadlock.Count; i++)
         {
-            if (hexagonsDeadlock[i].TypeHexagon == 1)
+            if (!hexagonsDeadlock[i].FreedomTest())
             {
                 if (hexagonControl == null)
                 {
@@ -243,12 +247,12 @@ public class HeroControl : MonoBehaviour
             _listDeadlock.Add(hexagonControl);
             BreakingTheDeadlock(hexagonControl.Row, hexagonControl.Column);
         }
-        else if (hexagonControl == null && (row == 0))
+        else if (hexagonControl == null && (row == 0 || column == 0))
         {
             _listProvenHexagons.Clear();
             BreakingTheDeadlock(_listDeadlock[0].Row, _listDeadlock[0].Column);
         }
-        else if (hexagonControl == null && (row != 0))
+        else if (hexagonControl == null && (row != 0 || column != 0))
         {
             int RowWay;
             int ColumnWay;
@@ -256,8 +260,15 @@ public class HeroControl : MonoBehaviour
             if (_listDeadlock[_listDeadlock.Count - 2].Row != row)
             {
                 int _columType = (row % 2) == 0 ? 1 : -1;
-                RowWay = row - _listDeadlock[_listDeadlock.Count - 2].Row;
-                ColumnWay = column - _listDeadlock[_listDeadlock.Count - 2].Column + _columType;
+                RowWay = (row - _listDeadlock[_listDeadlock.Count - 2].Row) > 0 ? 1 : -1;
+                if (_listDeadlock[_listDeadlock.Count - 2].Column != column)
+                {
+                    ColumnWay = ((column - _listDeadlock[_listDeadlock.Count - 2].Column) > 0 ? 1 : -1) + _columType;
+                }
+                else
+                {
+                    ColumnWay = _columType;
+                }
             }
             else
             {
@@ -267,15 +278,16 @@ public class HeroControl : MonoBehaviour
 
             hexagonControl = MapControlStatic.mapNav[(row + RowWay), (column + ColumnWay)];
 
+            RepeatCheck(out hexagonControl, hexagonControl);
+
             ListPoint.Add(MapControlStatic.mapNav[hexagonControl.Row, hexagonControl.Column]);
-            //ListPoint[ListPoint.Count - 1].Flag();
             int Row = _listWay[0].Row;
             int Column = _listWay[0].Column;
 
             _listProvenHexagons.Clear();
             _listWay.Clear();
-            SearchForAWay(Row, Column);
             _listDeadlock.Clear();
+            SearchForAWay(Row, Column);
         }
     }
     private int AnotherWay(List<HexagonControl> hexagons, int I)
@@ -286,16 +298,16 @@ public class HeroControl : MonoBehaviour
         {
             if (i != I)
             {
-                if (hexagons[i].TypeHexagon != 1)
+                if (hexagons[i].FreedomTest())
                 {
                     if (Magnitude == 0)
                     {
-                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        Magnitude = (ListPoint[_namberPoint].transform.position - hexagons[i].transform.position).magnitude;
                         index = i;
                     }
-                    if (Magnitude > (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude)
+                    if (Magnitude > (ListPoint[_namberPoint].transform.position - hexagons[i].transform.position).magnitude)
                     {
-                        Magnitude = (ListPoint[ListPoint.Count - 1].transform.position - hexagons[i].transform.position).magnitude;
+                        Magnitude = (ListPoint[_namberPoint].transform.position - hexagons[i].transform.position).magnitude;
                         index = i;
                     }
                 }
@@ -303,14 +315,130 @@ public class HeroControl : MonoBehaviour
         }
         return index;
     }
+    private void RepeatCheck(out HexagonControl hexagon, HexagonControl hexagonInstance)
+    {
+        for (int i = 0; i < ListPoint.Count; i++)
+        {
+            if (MapControlStatic.mapNav[hexagonInstance.Row, hexagonInstance.Column] == MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column])
+            {
+                hexagon = SearchForAnotherPeak(hexagonInstance.Row, hexagonInstance.Column);
+                RepeatCheck(out hexagon, hexagon);
+                return;
+            }
+        }
+        hexagon = hexagonInstance;
+    }
+    private HexagonControl SearchForAnotherPeak(int _row, int _column)
+    {
+        List<HexagonControl> hexagonsAnother = new List<HexagonControl>();
+        int _columBias = (_row % 2) == 0 ? 1 : -1;
+        float Magnitude = 0;
+        HexagonControl hexagonControl = null;
 
-    private void AddListPoint(HexagonControl hexagon)
+        #region AddToListHeighbors
+        if (_column < MapControlStatic.mapNav.GetLength(1) - 1)
+            hexagonsAnother.Add(MapControlStatic.mapNav[_row, _column + 1]);
+
+        if (_column > 0)
+            hexagonsAnother.Add(MapControlStatic.mapNav[_row, _column - 1]);
+
+        if (_row < MapControlStatic.mapNav.GetLength(0) - 1)
+        {
+            hexagonsAnother.Add(MapControlStatic.mapNav[_row + 1, _column]);
+
+            if (_column + _columBias > 0 && _column + _columBias < MapControlStatic.mapNav.GetLength(1) - 1)
+                hexagonsAnother.Add(MapControlStatic.mapNav[_row + 1, _column + _columBias]);
+        }
+
+        if (_row > 0)
+        {
+            hexagonsAnother.Add(MapControlStatic.mapNav[_row - 1, _column]);
+            if (_column + _columBias > 0 && _column + _columBias < MapControlStatic.mapNav.GetLength(1) - 1)
+                hexagonsAnother.Add(MapControlStatic.mapNav[_row - 1, _column + _columBias]);
+        }
+        #endregion
+        for (int i = 0; i < hexagonsAnother.Count; i++)
+        {
+            if (hexagonsAnother[i].FreedomTest())
+            {
+                if (hexagonControl == null)
+                {
+                    Magnitude = (_listWay[0].transform.position - hexagonsAnother[i].transform.position).magnitude;
+                    hexagonControl = hexagonsAnother[i];
+                }
+
+                if (Magnitude > (_listWay[0].transform.position - hexagonsAnother[i].transform.position).magnitude)
+                {
+                    Magnitude = (_listWay[0].transform.position - hexagonsAnother[i].transform.position).magnitude;
+                    hexagonControl = hexagonsAnother[i];
+                }
+            }
+        }
+
+        return hexagonControl;
+    }
+    private int PointSelection(int row, int column)
+    {
+        float Mag = 0;
+        int I = 0;
+        if (PassedPoints.Count <= 0)
+        {
+            Debug.Log(1);
+            for (int i = 0; i < ListPoint.Count; i++)
+            {
+                if (Mag == 0)
+                {
+                    Mag = (MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - MapControlStatic.mapNav[row, column].transform.position).magnitude;
+                    I = i;
+                }
+                if ((MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - MapControlStatic.mapNav[row, column].transform.position).magnitude < Mag)
+                {
+                    Mag = (MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - MapControlStatic.mapNav[row, column].transform.position).magnitude;
+                    I = i;
+                }
+            }
+        }
+        else
+        {
+            Debug.Log(2);
+
+            for (int i = 0; i < ListPoint.Count; i++)
+            {
+                for (int j = 0; j < PassedPoints.Count; j++)
+                {
+                    if (MapControlStatic.mapNav[PassedPoints[j].Row, PassedPoints[j].Column] != MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column])
+                    {
+                        if (Mag == 0)
+                        {
+                            Mag = (MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - MapControlStatic.mapNav[row, column].transform.position).magnitude;
+                            I = i;
+                        }
+                        if ((MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - MapControlStatic.mapNav[row, column].transform.position).magnitude != 0
+                            && ((MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - MapControlStatic.mapNav[row, column].transform.position).magnitude < Mag))
+                        {
+                            Mag = (MapControlStatic.mapNav[ListPoint[i].Row, ListPoint[i].Column].transform.position - MapControlStatic.mapNav[row, column].transform.position).magnitude;
+                            I = i;
+                        }
+
+                    }
+                }
+            }
+        }
+        Debug.Log("Two" + ListPoint[I].Row + " " + ListPoint[I].Column);
+
+        PassedPoints.Add(ListPoint[I]);
+
+        return I;
+    }
+
+    public void AddListPoint(HexagonControl hexagon)
     {
         _listWay.Clear();
         _listDeadlock.Clear();
         _listProvenHexagons.Clear();
         ListPoint.Clear();
         ListPoint.Add(hexagon);
+        _namberPoint = ListPoint.Count - 1;
     }
 
 }

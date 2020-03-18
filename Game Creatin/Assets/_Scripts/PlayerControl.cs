@@ -22,7 +22,7 @@ public class PlayerControl : MonoBehaviour
                 if (Collider.gameObject.layer == 8)
                 {
                     _heroControl = Collider.gameObject.GetComponent<HeroControl>();
-                    _heroControl.ListPoint.Add(MapControlStatic.mapNav[_heroControl.HexagonRow, _heroControl.HexagonColumn]);
+                    _heroControl.AddListPoint(MapControlStatic.mapNav[_heroControl.HexagonRow, _heroControl.HexagonColumn]);
                 }
             }
         }
