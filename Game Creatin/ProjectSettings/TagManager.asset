@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Hero
   - Hexagon
+  - HexAngle
   layers:
   - Default
   - TransparentFX

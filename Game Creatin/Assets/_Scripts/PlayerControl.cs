@@ -9,7 +9,7 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         _camera = Camera.main;
-        MapControlStatic.ListPoint.Add(MapControlStatic.mapNav[4, 13]);
+        MapControlStatic.ListPoint.Add(MapControlStatic.mapNav[3, 17]);
     }
 
     void Update()
@@ -37,17 +37,14 @@ public class PlayerControl : MonoBehaviour
 
                     if (Collider.gameObject.layer == 9 && Hexagon.TypeHexagon != 1)
                     {
-                        _heroControl.AddListPoint(MapControlStatic.mapNav[_heroControl.HexagonRow, _heroControl.HexagonColumn]);
-                        _heroControl.SearchForAWay(Hexagon.Row, Hexagon.Column);
+                        _heroControl.SatrtWay(Hexagon);
                     }
                     else
                     {
-                        _heroControl.ListPoint.Clear();
                     }
                 }
                 else
                 {
-                    _heroControl.ListPoint.Clear();
                 }
             }
         }
