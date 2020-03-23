@@ -63,10 +63,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\_Scripts\AlgorithmDijkstra.cs" />
+    <Compile Include="Assets\_Scripts\Graph.cs" />
     <Compile Include="Assets\_Scripts\HeroControl.cs" />
     <Compile Include="Assets\_Scripts\HexagonControl.cs" />
     <Compile Include="Assets\_Scripts\MapControl.cs" />
     <Compile Include="Assets\_Scripts\MapControlStatic.cs" />
+    <Compile Include="Assets\_Scripts\pg.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/Admin/Documents/RPG-Game/Game Creatin/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>

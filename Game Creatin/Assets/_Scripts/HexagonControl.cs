@@ -23,8 +23,8 @@ public class HexagonControl : MonoBehaviour
             (transform.parent.name);
         Column = System.Convert.ToInt32
             (name);
-        mag = (MapControlStatic.mapNav[3, 17].transform.position - transform.position).magnitude;
-        mag2 = (MapControlStatic.mapNav[5, 11].transform.position - transform.position).magnitude;
+        mag = (MapControlStatic.mapNav[3, 6].transform.position - transform.position).magnitude;
+        mag2 = (MapControlStatic.mapNav[7, 11].transform.position - transform.position).magnitude;
     }
 
     void Update()
