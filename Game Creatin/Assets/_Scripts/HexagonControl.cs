@@ -15,43 +15,26 @@ public class HexagonControl : MonoBehaviour
 
     [Range(0, 3)]
     public int TypeHexagon;
-    [SerializeField]
-    float mag,  mag2;
+    public int WallNumber;
+    //[SerializeField]
+    //float mag,  mag2;
     void Start()
     {
         Row = System.Convert.ToInt32
             (transform.parent.name);
         Column = System.Convert.ToInt32
             (name);
-        mag = (MapControlStatic.mapNav[3, 6].transform.position - transform.position).magnitude;
-        mag2 = (MapControlStatic.mapNav[7, 11].transform.position - transform.position).magnitude;
+        //mag = (MapControlStatic.mapNav[3, 6].transform.position - transform.position).magnitude;
+        //mag2 = (MapControlStatic.mapNav[7, 11].transform.position - transform.position).magnitude;
     }
 
     void Update()
     {
 
     }
-    //private void OnMouseDown()
-    //{
-    //    if (TypeHexagon != 1)
-    //    {
-    //        MapControlStatic.SearchForAWay(Row, Column);
-    //    }
-    //}
     public bool FreedomTest()
     {
-        if (TypeHexagon==1||TypeHexagon==2)
-        {
-            return false;
-        }
-        else /*if (true)*/
-        {
-            return true;
-        }
-    }
-    public bool FreedomTest(bool map)
-    {
-        if (TypeHexagon==1||TypeHexagon==2)
+        if (TypeHexagon==1)
         {
             return false;
         }

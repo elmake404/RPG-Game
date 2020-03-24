@@ -66,7 +66,7 @@ public class HeroControl : MonoBehaviour
         List<HexagonControl> PointList = new List<HexagonControl>();
         ListPoints.Reverse();
         PointList.AddRange(ListPoints);
-        Debug.Log(ListPoints.Count);
+        //Debug.Log(ListPoints.Count);
         ListPoints.Clear();
         while (PointList.Count > 0)
         {
@@ -94,8 +94,35 @@ public class HeroControl : MonoBehaviour
                 if (!GetHit.FreedomTest())
                 {
                     List<HexagonControl> listHexagonsPeaks = new List<HexagonControl>();
+                    List<int> ListNamber = new List<int>(GetHit.WallNumber);
                     listHexagonsPeaks.Add(FieldPosition());
                     listHexagonsPeaks.AddRange(GetHit.peaks);
+                    //GetHit.Flag();
+                    if (i != hit2Ds.Count - 1)
+                    {
+                        for (int j = i; j < hit2Ds.Count - 1; j++)
+                        {
+                            var GetHit2 = hit2Ds[j].collider.GetComponent<HexagonControl>();
+                            bool IsLackOf = true;
+                            if (!GetHit2.FreedomTest())
+                            {
+                                for (int v = 0; v < ListNamber.Count; v++)
+                                {
+                                    if (GetHit2.WallNumber == ListNamber[v])
+                                    {
+                                        IsLackOf = false;
+                                    }
+                                }
+                                if (IsLackOf)
+                                {
+                                    ListNamber.Add(GetHit2.WallNumber);
+                                    //GetHit2.Flag();
+                                    listHexagonsPeaks.AddRange(GetHit2.peaks);
+                                }
+
+                            }
+                        }
+                    }
                     listHexagonsPeaks.Add(hexagon);
                     //hit2Ds[i].collider.GetComponent<HexagonControl>().Flag();
                     BreakingTheDeadlock(listHexagonsPeaks);
@@ -104,12 +131,12 @@ public class HeroControl : MonoBehaviour
                 }
             }
         }
-            StopCoroutine(MoveCorotine);
-            ListPoints.Clear();
+        StopCoroutine(MoveCorotine);
+        ListPoints.Clear();
 
-            ListPoints.Add(hexagon);
-            MoveCorotine = Movement();
-            StartCoroutine(MoveCorotine);
+        ListPoints.Add(hexagon);
+        MoveCorotine = Movement();
+        StartCoroutine(MoveCorotine);
     }
     private void BreakingTheDeadlock(List<HexagonControl> listHexagons)
     {
@@ -148,6 +175,7 @@ public class HeroControl : MonoBehaviour
 
         for (int i = 0; i < nodesList.Count; i++)
         {
+            //nodesList[i].NodeHexagon.Flag();
             ListPoints.Add(nodesList[i].NodeHexagon);
         }
 
