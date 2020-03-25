@@ -7,7 +7,9 @@ public class MapControl : MonoBehaviour
     [SerializeField]
     private Transform[] hexagons;
     [SerializeField]
-    private GameObject game;
+    private HeroControl[] heroControls;
+    [SerializeField]
+    private HexagonControl[] _arreyVertex;
 
     void Awake()
     {
@@ -16,9 +18,13 @@ public class MapControl : MonoBehaviour
             hexagons[i].name = i.ToString();
             for (int j = 0; j < hexagons[i].childCount; j++)
             {
-               MapControlStatic.mapNav[i, j] = hexagons[i].GetChild(j).GetComponent<HexagonControl>();
+               //MapControlStatic.mapNav[i, j] = hexagons[i].GetChild(j).GetComponent<HexagonControl>();
                 hexagons[i].GetChild(j).name = j.ToString();
             }
+        }
+        for (int i = 0; i < heroControls.Length; i++)
+        {
+            heroControls[i].InitializationVertex(_arreyVertex);
         }
     }
 

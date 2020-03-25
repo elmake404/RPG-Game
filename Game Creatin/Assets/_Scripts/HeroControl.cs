@@ -11,8 +11,7 @@ public class HeroControl : MonoBehaviour
     [SerializeField]
     private float _speed;
     private int _namberPoint;
-
-
+    private List<HexagonControl> _listVertex;
 
     [System.NonSerialized]
     public int HexagonRow = 0, HexagonColumn = 0;
@@ -20,17 +19,21 @@ public class HeroControl : MonoBehaviour
     void Start()
     {
         MoveCorotine = Movement();
+       if( _listVertex.Count<=0)
+        {
+            Debug.LogError("The lack of vertex in the hero");
+        }
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            FieldPosition();
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    FieldPosition();
+        //}
 
     }
-    private HexagonControl FieldPosition()
+    private HexagonControl FieldPosition(bool elevation)//гексагон к которому принадлежит герой
     {
         List<RaycastHit2D> hit2Ds = new List<RaycastHit2D>();
         ContactFilter2D contactFilter2D = new ContactFilter2D();
@@ -41,7 +44,7 @@ public class HeroControl : MonoBehaviour
         for (int i = 0; i < hit2Ds.Count; i++)
         {
             var getHex = hit2Ds[i].collider.GetComponent<HexagonControl>();
-            if (getHex.FreedomTest())
+            if (getHex.FreedomTestType(elevation))
             {
                 if (hexagonControl == null)
                 {
@@ -61,17 +64,25 @@ public class HeroControl : MonoBehaviour
 
         return hexagonControl;
     }
-    private IEnumerator Movement()
+    private IEnumerator Movement()//коротина движения
     {
         List<HexagonControl> PointList = new List<HexagonControl>();
-        ListPoints.Reverse();
         PointList.AddRange(ListPoints);
-        //Debug.Log(ListPoints.Count);
         ListPoints.Clear();
         while (PointList.Count > 0)
         {
             transform.position = Vector2.MoveTowards(transform.position, PointList[0].transform.position, _speed);
-            if ((PointList[0].transform.position - transform.position).magnitude <= 3.65f)
+            Vector2 positionMain = transform.position;
+            Vector2 positionCurrent = PointList[0].transform.position;
+            if (PointList[0].TypeHexagon == 2 && gameObject.layer == 8)
+            {
+                gameObject.layer = 11;
+            }
+            else if (PointList[0].TypeHexagon == 0 && gameObject.layer == 11)
+            {
+                gameObject.layer = 8;
+            }
+            if ((positionCurrent - positionMain).magnitude <=0.001f)
             {
                 PointList.Remove(PointList[0]);
             }
@@ -79,82 +90,88 @@ public class HeroControl : MonoBehaviour
         }
 
     }
-    private void SearchForAWay(HexagonControl hexagon)
+    private List<HexagonControl> SearchForAWay(HexagonControl hexagon, LayerMask layerMask, Transform startingPoint, bool elevation)//возврашет все вершины по которым надо пройти 
     {
+        List<HexagonControl> ListOfNecessaryVertices = new List<HexagonControl>();
+        List<HexagonControl> ListHexgon = new List<HexagonControl>();
+
+        bool IsStraightWay = true;
         List<RaycastHit2D> hit2Ds = new List<RaycastHit2D>();
+
         ContactFilter2D contactFilter2D = new ContactFilter2D();
-        float distance = (transform.position - hexagon.transform.position).magnitude;
-        Physics2D.Raycast(transform.position, -(transform.position - hexagon.transform.position).normalized, contactFilter2D, hit2Ds, distance);
+        contactFilter2D.SetLayerMask(layerMask);
+        contactFilter2D.useLayerMask = true;
+
+        float distance = (startingPoint.position - hexagon.transform.position).magnitude;
+
+        Physics2D.Raycast(startingPoint.position, -(startingPoint.position - hexagon.transform.position).normalized, contactFilter2D, hit2Ds, distance);
+
         if (hit2Ds.Count > 0)
         {
             for (int i = 0; i < hit2Ds.Count; i++)
             {
                 var GetHit = hit2Ds[i].collider.GetComponent<HexagonControl>();
 
-                if (!GetHit.FreedomTest())
+                if (GetHit.TypeHexagon==2)
                 {
-                    List<HexagonControl> listHexagonsPeaks = new List<HexagonControl>();
-                    List<int> ListNamber = new List<int>(GetHit.WallNumber);
-                    listHexagonsPeaks.Add(FieldPosition());
-                    listHexagonsPeaks.AddRange(GetHit.peaks);
-                    //GetHit.Flag();
-                    if (i != hit2Ds.Count - 1)
-                    {
-                        for (int j = i; j < hit2Ds.Count - 1; j++)
-                        {
-                            var GetHit2 = hit2Ds[j].collider.GetComponent<HexagonControl>();
-                            bool IsLackOf = true;
-                            if (!GetHit2.FreedomTest())
-                            {
-                                for (int v = 0; v < ListNamber.Count; v++)
-                                {
-                                    if (GetHit2.WallNumber == ListNamber[v])
-                                    {
-                                        IsLackOf = false;
-                                    }
-                                }
-                                if (IsLackOf)
-                                {
-                                    ListNamber.Add(GetHit2.WallNumber);
-                                    //GetHit2.Flag();
-                                    listHexagonsPeaks.AddRange(GetHit2.peaks);
-                                }
+                    Debug.Log(1);
+                }
 
-                            }
-                        }
-                    }
-                    listHexagonsPeaks.Add(hexagon);
-                    //hit2Ds[i].collider.GetComponent<HexagonControl>().Flag();
-                    BreakingTheDeadlock(listHexagonsPeaks);
-                    //здесь чистим у нас есть проблемы 
-                    return;
+                if (!GetHit.FreedomTestType(false))
+                {
+                    IsStraightWay = false;
+                    ListHexgon.Add(FieldPosition(elevation));
+                    ListHexgon.AddRange(_listVertex);
+
+                    ListHexgon.Add(hexagon);
+                    ListOfNecessaryVertices.AddRange(BreakingTheDeadlock(ListHexgon/*, layerMask*/));
+                    break;
                 }
             }
         }
-        StopCoroutine(MoveCorotine);
-        ListPoints.Clear();
-
-        ListPoints.Add(hexagon);
-        MoveCorotine = Movement();
-        StartCoroutine(MoveCorotine);
+        if (IsStraightWay)
+        {
+            ListOfNecessaryVertices.Add(hexagon);
+        }
+        //_listVertex.Remove(_listVertex[_listVertex.Count-1]);
+        //_listVertex.Remove(_listVertex[0]);
+        return ListOfNecessaryVertices;
     }
-    private void BreakingTheDeadlock(List<HexagonControl> listHexagons)
+    private List<HexagonControl> BreakingTheDeadlock(List<HexagonControl> listHexagons/*, LayerMask layerMask*/)//выстравивает пути обхода
     {
         var graph = new Graph(listHexagons);
         for (int i = 0; i < graph.Length - 1; i++)
         {
-            //graph[i].NodeHexagon.Flag();
+            bool IsElevation = false;
             for (int j = i + 1; j < graph.Length; j++)
             {
                 List<RaycastHit2D> hit2Ds = new List<RaycastHit2D>();
+
                 ContactFilter2D contactFilter2D = new ContactFilter2D();
+                LayerMask layerMask;
+                if (listHexagons[i].TypeHexagon<=0)
+                {
+                    layerMask = LayerMask.GetMask("Hero", "Hexagon", "LowerBarrier");
+                }
+                else
+                {
+                    IsElevation = true;
+                    layerMask = LayerMask.GetMask("Hero", "Hexagon", "Elevation"/*, "LowerBarrier"*/);
+                }
+
+                contactFilter2D.SetLayerMask(layerMask);
+                contactFilter2D.useLayerMask = true;
+
                 float distance = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
-                Physics2D.Raycast(graph[i].NodeHexagon.transform.position, -(graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).normalized, contactFilter2D, hit2Ds, distance);
+
+                Physics2D.CircleCast(graph[i].NodeHexagon.transform.position, 1f, -(graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).normalized, contactFilter2D, hit2Ds, distance);
+
                 bool NoRibs = false;
                 for (int v = 0; v < hit2Ds.Count; v++)
                 {
                     var GetHit = hit2Ds[v].collider.GetComponent<HexagonControl>();
-                    if (!GetHit.FreedomTest())
+
+                    if (!GetHit.FreedomTestType(IsElevation))
                     {
                         NoRibs = true;
                     }
@@ -162,31 +179,51 @@ public class HeroControl : MonoBehaviour
                 }
                 if (!NoRibs)
                 {
+
                     float magnitude = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
                     graph[i].Connect(graph[j], magnitude);
                 }
             }
         }
+        //List<Node> f = graph[2].IncidentNodes();
+        //for (int i = 0; i < f.Count; i++)
+        //{
+        //    f[i].NodeHexagon.Flag();
+
+        //}
         AlgorithmDijkstra algorithmDijkstra = new AlgorithmDijkstra();
         List<Node> nodesList = algorithmDijkstra.Dijkstra(graph);
 
-        StopCoroutine(MoveCorotine);
-        ListPoints.Clear();
-
+        List<HexagonControl> ListVertex = new List<HexagonControl>();
         for (int i = 0; i < nodesList.Count; i++)
         {
-            //nodesList[i].NodeHexagon.Flag();
-            ListPoints.Add(nodesList[i].NodeHexagon);
+            ListVertex.Add(nodesList[i].NodeHexagon);
         }
+        return ListVertex;
+    }
 
+    public void StartWay(HexagonControl hexagonFinish)
+    {
+        //всегда вноси новый слой
+        LayerMask layerMask = LayerMask.GetMask("Hero", "Hexagon", "LowerBarrier");
+        ListPoints.Clear();
+        ListPoints.AddRange(SearchForAWay(hexagonFinish, layerMask, transform,false));
+        StopCoroutine(MoveCorotine);
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
-
     }
-
-    public void SatrtWay(HexagonControl hexagon)
+    public void StartWayElevation(HexagonControl hexagonFinish)
     {
-        SearchForAWay(hexagon);
+        LayerMask layerMask = LayerMask.GetMask("Hero", "Hexagon", "Elevation");
+        ListPoints.Clear();
+        ListPoints.AddRange(SearchForAWay(hexagonFinish, layerMask, transform,true));
+        StopCoroutine(MoveCorotine);
+        MoveCorotine = Movement();
+        StartCoroutine(MoveCorotine);
     }
-
+    public void InitializationVertex(HexagonControl[]hexagons)
+    {
+        _listVertex = new List<HexagonControl>();
+        _listVertex.AddRange(hexagons);
+    }
 }

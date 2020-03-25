@@ -7,44 +7,83 @@ public class HexagonControl : MonoBehaviour
     [SerializeField]
     private GameObject _flag;
 
-    public HexagonControl[] peaks;
-
     [System.NonSerialized]
     public int Row, Column;
 
-
     [Range(0, 3)]
     public int TypeHexagon;
-    public int WallNumber;
     //[SerializeField]
     //float mag,  mag2;
     void Start()
     {
-        Row = System.Convert.ToInt32
-            (transform.parent.name);
-        Column = System.Convert.ToInt32
-            (name);
-        //mag = (MapControlStatic.mapNav[3, 6].transform.position - transform.position).magnitude;
-        //mag2 = (MapControlStatic.mapNav[7, 11].transform.position - transform.position).magnitude;
+        if (TypeHexagon != 2)
+        {
+            Row = System.Convert.ToInt32
+                (transform.parent.name);
+            Column = System.Convert.ToInt32
+                (name);
+        }
     }
 
     void Update()
     {
 
     }
-    public bool FreedomTest()
+    public bool FreedomTestType( bool Elevtion)
     {
-        if (TypeHexagon==1)
+        if (!Elevtion)
+        {
+            if (TypeHexagon == 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (TypeHexagon == 3)
+            {
+                return true;
+            }
+            else if (gameObject.layer != 10)
+            {
+                return false;
+            }
+            else if (TypeHexagon == 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+        }
+    }
+    public bool FreedomTestLayer()
+    {
+        if (TypeHexagon == 3)
+        {
+            return true;
+        }
+        else if (gameObject.layer != 10)
         {
             return false;
         }
-        else /*if (true)*/
+        else if (TypeHexagon == 1)
+        {
+            return false;
+        }
+        else
         {
             return true;
         }
     }
     public void Flag()
     {
-        Instantiate(_flag,transform);
+        Instantiate(_flag, transform);
     }
 }

@@ -65,7 +65,7 @@ public class AlgorithmDijkstra
             result.Add(end);
             end = track[end].Previous;
         }
-        //result.Reverse();
+        result.Reverse();
         return result;
 
     }

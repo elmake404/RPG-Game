@@ -52,7 +52,10 @@ public class Node
     {
         return incidentEdge;
     }
-
+    public int incidentEdgeCount()
+    {
+        return incidentEdge.Count;
+    }
     public void Connect(Node node,float magnitude)
     {
         Edge edge = new Edge(this,node,magnitude);
