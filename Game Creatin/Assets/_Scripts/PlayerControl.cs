@@ -37,14 +37,14 @@ public class PlayerControl : MonoBehaviour
 
                     if ((Collider.gameObject.layer == 9 || Collider.gameObject.layer == 10) && Hexagon.TypeHexagon != 1)
                     {
-                        //if (_heroControl.gameObject.layer==8)
-                        //{
-                            _heroControl.StartWay(Hexagon);
-                        //}
-                        //else
-                        //{
-                        //    _heroControl.StartWayElevation(Hexagon);
-                        //}
+                        if (_heroControl.gameObject.layer == 8)
+                        {
+                            _heroControl.Navigation.StartWay(Hexagon);
+                        }
+                        else
+                        {
+                            _heroControl.Navigation.StartWayElevation(Hexagon);
+                        }
 
                     }
                     else if (Collider.gameObject.layer == 10 && Hexagon.TypeHexagon != 1)
@@ -55,6 +55,7 @@ public class PlayerControl : MonoBehaviour
                 {
                 }
             }
+            _heroControl = null;
         }
 
     }

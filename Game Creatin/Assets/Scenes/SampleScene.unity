@@ -863,6 +863,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dad6645ce3b92348a10b70fda36daa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1442763446 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2822881598915167576, guid: f758cd8508595d146b695d0240d4a5ad,
+    type: 3}
+  m_PrefabInstance: {fileID: 6255017354881447361}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33d1167d4fc7ec14ab31b6cbfb858a07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1529180758 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6472851268533981096, guid: 1517a5e9b14368743bb5412eed3f20bb,
@@ -4214,6 +4226,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3047916451494015950, guid: 417f0032036f2a94ea19fe46dfd070be,
         type: 3}
+      propertyPath: _heroControls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3047916451494015950, guid: 417f0032036f2a94ea19fe46dfd070be,
+        type: 3}
+      propertyPath: _enemyControls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3047916451494015950, guid: 417f0032036f2a94ea19fe46dfd070be,
+        type: 3}
       propertyPath: heroControls.Array.data[0]
       value: 
       objectReference: {fileID: 381925843}
@@ -4342,6 +4364,16 @@ PrefabInstance:
       propertyPath: _arreyVertex.Array.data[24]
       value: 
       objectReference: {fileID: 1645851876}
+    - target: {fileID: 3047916451494015950, guid: 417f0032036f2a94ea19fe46dfd070be,
+        type: 3}
+      propertyPath: _heroControls.Array.data[0]
+      value: 
+      objectReference: {fileID: 381925843}
+    - target: {fileID: 3047916451494015950, guid: 417f0032036f2a94ea19fe46dfd070be,
+        type: 3}
+      propertyPath: _enemyControls.Array.data[0]
+      value: 
+      objectReference: {fileID: 1442763446}
     - target: {fileID: 3073514292813038902, guid: 417f0032036f2a94ea19fe46dfd070be,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -6064,6 +6096,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673315783065488781, guid: f758cd8508595d146b695d0240d4a5ad,
+        type: 3}
+      propertyPath: _speed
+      value: 0.3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f758cd8508595d146b695d0240d4a5ad, type: 3}

@@ -7,7 +7,9 @@ public class MapControl : MonoBehaviour
     [SerializeField]
     private Transform[] hexagons;
     [SerializeField]
-    private HeroControl[] heroControls;
+    private HeroControl[] _heroControls;
+    [SerializeField]
+    private EnemyControl[] _enemyControls;
     [SerializeField]
     private HexagonControl[] _arreyVertex;
 
@@ -22,9 +24,14 @@ public class MapControl : MonoBehaviour
                 hexagons[i].GetChild(j).name = j.ToString();
             }
         }
-        for (int i = 0; i < heroControls.Length; i++)
+        for (int i = 0; i < _heroControls.Length; i++)
         {
-            heroControls[i].InitializationVertex(_arreyVertex);
+            _heroControls[i].Navigation.InitializationVertex(_arreyVertex);
+        }
+        for (int i = 0; i < _enemyControls.Length; i++)
+        {
+            _enemyControls[i].InitializationHero(_heroControls);
+            _enemyControls[i].Navigation.InitializationVertex(_arreyVertex);
         }
     }
 
