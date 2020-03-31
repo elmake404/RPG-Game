@@ -39,11 +39,11 @@ public class PlayerControl : MonoBehaviour
                     {
                         if (_heroControl.gameObject.layer == 8)
                         {
-                            _heroControl.Navigation.StartWay(Hexagon);
+                            _heroControl.NavigationHero.StartWay(Hexagon);
                         }
                         else
                         {
-                            _heroControl.Navigation.StartWayElevation(Hexagon);
+                            _heroControl.NavigationHero.StartWayElevation(Hexagon);
                         }
 
                     }

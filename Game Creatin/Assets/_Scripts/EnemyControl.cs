@@ -27,9 +27,9 @@ public class EnemyControl : MonoBehaviour
         {
             _heroTarget = SearchForTheClosestHero();
         }
-        else if (_hexagonTarget != _heroTarget.Navigation.FieldPosition())
+        else if (_hexagonTarget != _heroTarget.NavigationHero.FieldPosition())
         {
-            _hexagonTarget = _heroTarget.Navigation.FieldPosition();
+            _hexagonTarget = _heroTarget.NavigationHero.FieldPosition();
             if (gameObject.layer == 8)
             {
                 Navigation.StartWay(_hexagonTarget.FieldPosition(transform));

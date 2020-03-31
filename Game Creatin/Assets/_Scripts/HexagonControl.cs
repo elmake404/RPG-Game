@@ -29,8 +29,30 @@ public class HexagonControl : MonoBehaviour
     {
 
     }
+    public List<HexagonControl> SurroundingPeak()//вершины вогрук героя 
+    {
+        List<HexagonControl> hexagonControls = new List<HexagonControl>();
+        bool elevation = gameObject.layer != 9;
+        List<RaycastHit2D> hit2Ds = new List<RaycastHit2D>();
+        ContactFilter2D contactFilter2D = new ContactFilter2D();
+        Physics2D.CircleCast(transform.position, 2f, transform.position - transform.position, contactFilter2D, hit2Ds);
 
-    public HexagonControl FieldPosition(Transform customer)//гексагон к которому принадлежит герой
+        for (int i = 0; i < hit2Ds.Count; i++)
+        {
+            if (hit2Ds[i].collider.gameObject==gameObject)
+            {
+                continue;
+            }
+            var getHex = hit2Ds[i].collider.GetComponent<HexagonControl>();
+            if (getHex.FreedomTestType(elevation))
+            {
+                hexagonControls.Add(getHex);
+            }
+        }
+        return hexagonControls;
+    }
+
+    public HexagonControl FieldPosition(Transform customer)//гексагон к которому надо идти 
     {
         bool elevation = gameObject.layer != 9;
         List<RaycastHit2D> hit2Ds = new List<RaycastHit2D>();

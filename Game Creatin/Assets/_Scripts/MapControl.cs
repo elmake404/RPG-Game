@@ -26,7 +26,7 @@ public class MapControl : MonoBehaviour
         }
         for (int i = 0; i < _heroControls.Length; i++)
         {
-            _heroControls[i].Navigation.InitializationVertex(_arreyVertex);
+            _heroControls[i].NavigationHero.InitializationVertex(_arreyVertex);
         }
         for (int i = 0; i < _enemyControls.Length; i++)
         {
