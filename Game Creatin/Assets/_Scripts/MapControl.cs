@@ -11,16 +11,22 @@ public class MapControl : MonoBehaviour
     [SerializeField]
     private EnemyControl[] _enemyControls;
     [SerializeField]
-    private HexagonControl[] _arreyVertex;
+    private HexagonControl[] _arreyVertex,_elevation;
 
     void Awake()
     {
+        MapControlStatic.MapPos = transform.position;
+        MapControlStatic.Elevation = new HexagonControl[_elevation.Length];
+        for (int i = 0; i < _elevation.Length; i++)
+        {
+            MapControlStatic.Elevation[i] = _elevation[i];
+        }
         for (int i = 0; i < hexagons.Length; i++)
         {
             hexagons[i].name = i.ToString();
             for (int j = 0; j < hexagons[i].childCount; j++)
             {
-               //MapControlStatic.mapNav[i, j] = hexagons[i].GetChild(j).GetComponent<HexagonControl>();
+                MapControlStatic.mapNav[i, j] = hexagons[i].GetChild(j).GetComponent<HexagonControl>();
                 hexagons[i].GetChild(j).name = j.ToString();
             }
         }

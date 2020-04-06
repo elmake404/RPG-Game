@@ -7,6 +7,7 @@ public class HexagonControl : MonoBehaviour
     [SerializeField]
     private GameObject _flag;
 
+    public HexagonControl Elevstion;
     [System.NonSerialized]
     public int Row, Column;
 
@@ -23,6 +24,10 @@ public class HexagonControl : MonoBehaviour
             Column = System.Convert.ToInt32
                 (name);
         }
+        //if (Elevstion!=null)
+        //{
+        //    Elevstion.Flag();
+        //}
     }
 
     void Update()
@@ -39,7 +44,7 @@ public class HexagonControl : MonoBehaviour
 
         for (int i = 0; i < hit2Ds.Count; i++)
         {
-            if (hit2Ds[i].collider.gameObject==gameObject)
+            if (hit2Ds[i].collider.gameObject == gameObject)
             {
                 continue;
             }
@@ -66,7 +71,7 @@ public class HexagonControl : MonoBehaviour
             var getHex = hit2Ds[i].collider.GetComponent<HexagonControl>();
             if (getHex.FreedomTestType(elevation))
             {
-                if (getHex==this)
+                if (getHex == this)
                 {
                     continue;
                 }
@@ -86,11 +91,11 @@ public class HexagonControl : MonoBehaviour
         return hexagonControl;
     }
 
-    public bool FreedomTestType( bool Elevtion)
+    public bool FreedomTestType(bool Elevtion)
     {
         if (!Elevtion)
         {
-            if (TypeHexagon == 1|| (gameObject.layer == 10))
+            if (TypeHexagon == 1 || (gameObject.layer == 10))
             {
                 return false;
             }
@@ -118,25 +123,6 @@ public class HexagonControl : MonoBehaviour
                 return true;
             }
 
-        }
-    }
-    public bool FreedomTestLayer()
-    {
-        if (TypeHexagon == 3)
-        {
-            return true;
-        }
-        else if (gameObject.layer != 10)
-        {
-            return false;
-        }
-        else if (TypeHexagon == 1)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
         }
     }
     public void Flag()
