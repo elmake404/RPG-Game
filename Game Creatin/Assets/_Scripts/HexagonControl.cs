@@ -127,6 +127,6 @@ public class HexagonControl : MonoBehaviour
     }
     public void Flag()
     {
-        Instantiate(_flag, transform);
+        //Instantiate(_flag, transform);
     }
 }

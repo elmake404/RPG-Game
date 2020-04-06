@@ -15,6 +15,8 @@ public class Navigation : MonoBehaviour
     bool GG;
     [System.NonSerialized]
     public int HexagonRow = 0, HexagonColumn = 0;
+    [HideInInspector]
+    public bool IsGo;
 
     void Start()
     {
@@ -64,6 +66,7 @@ public class Navigation : MonoBehaviour
     }
     private IEnumerator Movement()//коротина движения
     {
+        IsGo = true;
         List<HexagonControl> PointList = new List<HexagonControl>();
         PointList.AddRange(ListPoints);
         ListPoints.Clear();
@@ -86,7 +89,7 @@ public class Navigation : MonoBehaviour
             }
             yield return new WaitForSeconds(0.02f);
         }
-
+        IsGo = false;
     }
     private List<HexagonControl> SearchForAWay(HexagonControl hexagon, Transform startingPoint, bool elevation)//возврашет все вершины по которым надо пройти 
     {

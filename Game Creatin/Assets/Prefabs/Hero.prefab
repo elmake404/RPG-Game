@@ -128,6 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50a7b54e4248ea1458fa5335b3d4595b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _animator: {fileID: 6294914234715882394}
   NavigationHero: {fileID: 1079215778108624622}
 --- !u!114 &1079215778108624622
 MonoBehaviour:
@@ -142,6 +143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 0.4
+  IsGo: 0
 --- !u!50 &8699803935369676830
 Rigidbody2D:
   serializedVersion: 4
@@ -276,6 +278,12 @@ PrefabInstance:
 --- !u!4 &956674645899917680 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 791330961130291464, guid: d0edf0a8dbee3444c961f08d4db2bdd5,
+    type: 3}
+  m_PrefabInstance: {fileID: 557766669171964024}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &6294914234715882394 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5828100959066553314, guid: d0edf0a8dbee3444c961f08d4db2bdd5,
     type: 3}
   m_PrefabInstance: {fileID: 557766669171964024}
   m_PrefabAsset: {fileID: 0}

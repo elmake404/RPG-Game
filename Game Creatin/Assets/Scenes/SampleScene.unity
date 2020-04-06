@@ -2746,55 +2746,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dad6645ce3b92348a10b70fda36daa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1731800112 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 682801792591355630, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
-    type: 3}
-  m_PrefabInstance: {fileID: 1889965233460221307}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1731800113 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 956674645899917680, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
     type: 3}
   m_PrefabInstance: {fileID: 1889965233460221307}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &1731800114
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731800112}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: c90b98d91f54b654796d31cf76504916, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &1731800115
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731800112}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 097b551f2844b054290f18a39bf892e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Solvers:
-  - {fileID: 1802723408}
-  - {fileID: 1948755004}
-  - {fileID: 1460261108}
-  - {fileID: 476416218}
-  m_Weight: 1
 --- !u!114 &1784843030 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4882868943882156750, guid: 1517a5e9b14368743bb5412eed3f20bb,
@@ -3098,6 +3055,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1166543098225668318, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
+        type: 3}
+      propertyPath: m_Solvers.Array.data[0]
+      value: 
+      objectReference: {fileID: 1802723408}
+    - target: {fileID: 1166543098225668318, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
+        type: 3}
+      propertyPath: m_Solvers.Array.data[1]
+      value: 
+      objectReference: {fileID: 1948755004}
+    - target: {fileID: 1166543098225668318, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
+        type: 3}
+      propertyPath: m_Solvers.Array.data[2]
+      value: 
+      objectReference: {fileID: 1460261108}
+    - target: {fileID: 1166543098225668318, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
+        type: 3}
+      propertyPath: m_Solvers.Array.data[3]
+      value: 
+      objectReference: {fileID: 476416218}
     - target: {fileID: 1727449612580833919, guid: a3e31e8b26f0dbf4ca7afcb873f13b07,
         type: 3}
       propertyPath: m_Name

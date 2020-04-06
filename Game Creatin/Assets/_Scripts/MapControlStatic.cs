@@ -14,7 +14,7 @@ public static class MapControlStatic
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            Debug.Log(TargetPos.x - currentVector.x);
+            //Debug.Log(TargetPos.x - currentVector.x);
             controls = GetPositionOnTheMap(currentVector);
             Vector2 PosHex = controls.transform.position;
             if ((PosHex - currentVector).magnitude <= 1.8)
