@@ -66,20 +66,24 @@ public class Node
 
 public class Graph
 {
-    private Node[] nodes;
+    private List<Node> nodes;
     public Graph(List<HexagonControl>ListHexagon)
     {
-        nodes = new Node[ListHexagon.Count];
+        nodes = new List<Node>();
 
         for (int i = 0; i < ListHexagon.Count; i++)
         {
-            nodes[i] = new Node(i, ListHexagon[i]);
+            nodes.Add(new Node(i, ListHexagon[i]));
         }
+    }
+    public void AddNode(Node newNode)
+    {
+        nodes.Insert(nodes.Count - 1, newNode);
     }
 
     public int Length
     {
-        get { return nodes.Length; }
+        get { return nodes.Count; }
     }
 
     public Node this[int index]
@@ -89,9 +93,9 @@ public class Graph
     }
     public List<Node> GetListNodes()
     {
-        List<Node> nodesList = new List<Node>();
-        nodesList.AddRange(nodes);
-        return nodesList;
+        //List<Node> nodesList = new List<Node>();
+        //nodesList.AddRange(nodes);
+        return nodes;
     }
     public IEnumerable<Node> Nodes
     {

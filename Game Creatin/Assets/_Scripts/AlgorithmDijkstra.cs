@@ -14,14 +14,8 @@ public class AlgorithmDijkstra
         var notVisited = graph.GetListNodes();
         var track = new Dictionary<Node, DijkstraData>();
         track[notVisited[0]] = new DijkstraData { Previous = null, Price = 0 };
-        //int namber = 0;
         while (true)
         {
-            //namber++;
-            //if (namber>300)
-            //{
-            //    break;
-            //}
             Node toOpen = null;
             float priceToOpen = float.PositiveInfinity;
             foreach (var v in notVisited)
@@ -53,11 +47,6 @@ public class AlgorithmDijkstra
             }
             notVisited.Remove(toOpen);
         }
-        //if (namber > 300)
-        //{
-        //    Debug.LogError("Infinity");
-        //    return null;
-        //}
         var result = new List<Node>();
         Node end = graph[graph.Length - 1];
         while (end != null)
