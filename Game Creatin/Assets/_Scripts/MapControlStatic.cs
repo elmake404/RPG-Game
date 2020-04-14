@@ -6,65 +6,70 @@ public static class MapControlStatic
 {
     public static Vector2 MapPos;
     public static HexagonControl[,] mapNav = new HexagonControl[9, 20];//масив содержащий все 6-ти угольники
-    public static HexagonControl[] Elevation;
-    public static bool /*List<HexagonControl>*/ CollisionCheck(Vector2 StartPos, Vector2 TargetPos, bool elevation)
+    //public static HexagonControl[] Elevation;
+    public static Graph GraphStatic;
+    public static bool CollisionCheck(Vector2 StartPos, Vector2 TargetPos, bool elevation)
     {
-        HexagonControl controls = null;
+        HexagonControl[] controls = null;
         Vector2 currentVector = StartPos;
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            //Debug.Log(TargetPos.x - currentVector.x);
-            controls = GetPositionOnTheMap(currentVector);
-            Vector2 PosHex = controls.transform.position;
-            if ((PosHex - currentVector).magnitude <= 1.8)
+            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            for (int i = 0; i < controls.Length; i++)
             {
-                //controls.Flag();
-                if (!controls.FreedomTestType(elevation))
+                Vector2 PosHex = controls[i].transform.position;
+                if ((PosHex - currentVector).magnitude <= 1.8)
                 {
-                    return false;
+                    //controls.Flag();
+                    if (!controls[i].FreedomTestType(elevation))
+                    {
+                        return false;
+                    }
                 }
             }
             currentVector = Vector2.MoveTowards(currentVector, TargetPos, 0.4f);
         }
         return true;
     }
-    public static bool/*List<HexagonControl>*/ CollisionCheckElevation(Vector2 StartPos, Vector2 TargetPos, bool elevation)
+    public static bool CollisionCheckElevation(Vector2 StartPos, Vector2 TargetPos, bool elevation)
     {
-        List<HexagonControl> controls = new List<HexagonControl>();
+       HexagonControl[] controls = null;
 
         Vector2 currentVector = StartPos;
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
+            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            for (int i = 0; i < controls.Length; i++)
+            {
+                Vector2 PosHex = controls[i].transform.position;
+                if ((PosHex - currentVector).magnitude <= 1.8)
+                {
+                    if (controls[i].Elevstion!=null)
+                    {                    
+                        if (!controls[i].Elevstion.FreedomTestType(elevation))
+                        {
+                            Debug.Log(elevation);
 
-            //for (int i = 0; i < mapNav.GetLength(0); i++)
-            //{
-            //    for (int j = 0; j < mapNav.GetLength(1); j++)
-            //    {
-            //        if (mapNav[i, j].gameObject.layer==12)
-            //        {
-            //            continue;
-            //        }
-            //        Vector2 PosHex = mapNav[i, j].transform.position;
-            //        if ((PosHex - currentVector).magnitude<=1.8)
-            //        {
-            //            //controls.Add(mapNav[i, j]);
-
-            //            if (!mapNav[i, j].FreedomTestType(elevation))
-            //            {
-            //                return false;
-            //            }
-
-            //            //mapNav[i, j].Flag();
-            //        }
-            //    }
-            //}
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (!controls[i].FreedomTestType(elevation))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
             currentVector = Vector2.MoveTowards(currentVector, TargetPos, 0.4f);
         }
+
         return true;
     }
-    public static HexagonControl GetPositionOnTheMap(Vector2 Position)
+    public static HexagonControl[] GetPositionOnTheMap(float XTarget, Vector2 Position)
     {
         float Y = (Position.y - MapPos.y) / 3f;
         int YMax = Mathf.Abs(Mathf.RoundToInt(Y));
@@ -98,12 +103,18 @@ public static class MapControlStatic
 
         X = X > 0 ? X : 0;
         int XInt = Mathf.RoundToInt(X);
-        if ((float)System.Math.Round((XInt - X), 2) == 0.5)
+        if ((float)System.Math.Round((XInt - X), 2) == 0.5 && XTarget == 0)
         {
-            mapNav[(int)Y, XInt].Flag();
-            mapNav[(int)Y, XInt - 1].Flag();
+            HexagonControl[] hexagons = new HexagonControl[2];
+            hexagons[0] = mapNav[(int)Y, XInt];
+            hexagons[1] = mapNav[(int)Y, XInt - 1];
+            return hexagons;
         }
-
-        return mapNav[(int)Y, XInt];
+        else
+        {
+            HexagonControl[] hexagons = new HexagonControl[1];
+            hexagons[0] = mapNav[(int)Y, XInt];
+            return hexagons;
+        }
     }
 }

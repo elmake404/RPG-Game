@@ -7,7 +7,7 @@ public class HexagonControl : MonoBehaviour
     [SerializeField]
     private GameObject _flag;
 
-    public HexagonControl Elevstion;
+    public HexagonControl Elevstion, Floor;
     [System.NonSerialized]
     public int Row, Column;
 
@@ -15,6 +15,13 @@ public class HexagonControl : MonoBehaviour
     public int TypeHexagon;
     //[SerializeField]
     //float mag,  mag2;
+    private void Awake()
+    {
+        if (Elevstion != null)
+        {
+            Elevstion.Floor = this;
+        }
+    }
     void Start()
     {
         if (TypeHexagon != 2)
@@ -24,9 +31,9 @@ public class HexagonControl : MonoBehaviour
             Column = System.Convert.ToInt32
                 (name);
         }
-        //if (Elevstion!=null)
+        //if (Floor != null)
         //{
-        //    Elevstion.Flag();
+        //    Floor.Flag();
         //}
     }
 
@@ -127,6 +134,6 @@ public class HexagonControl : MonoBehaviour
     }
     public void Flag()
     {
-        //Instantiate(_flag, transform);
+        Instantiate(_flag, transform);
     }
 }

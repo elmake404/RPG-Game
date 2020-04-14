@@ -71,6 +71,7 @@
     <Compile Include="Assets\_Scripts\MapControl.cs" />
     <Compile Include="Assets\_Scripts\MapControlStatic.cs" />
     <Compile Include="Assets\_Scripts\Navigation.cs" />
+    <Compile Include="Assets\_Scripts\NavigationBot.cs" />
     <Compile Include="Assets\_Scripts\pg.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\AnimationEvents.cs" />

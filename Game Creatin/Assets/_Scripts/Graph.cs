@@ -76,9 +76,9 @@ public class Graph
             nodes.Add(new Node(i, ListHexagon[i]));
         }
     }
-    public void AddNode(Node newNode)
+    public void AddNode(HexagonControl newNode)
     {
-        nodes.Insert(nodes.Count - 1, newNode);
+        nodes.Add(new Node(nodes.Count-1, newNode));
     }
 
     public int Length

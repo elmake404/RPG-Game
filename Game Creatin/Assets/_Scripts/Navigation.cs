@@ -5,7 +5,7 @@ using UnityEngine;
 public class Navigation : MonoBehaviour
 {
     private IEnumerator MoveCorotine;
-    private List<HexagonControl> ListPoints = new List<HexagonControl>();//пройденные вершины 
+    private List<HexagonControl> ListPoints = new List<HexagonControl>();//точки через который надо пройти 
 
 
     [SerializeField]
@@ -35,35 +35,11 @@ public class Navigation : MonoBehaviour
         }
 
     }
-    public HexagonControl FieldPosition()//гексагон к которому принадлежит герой
-    {
-        bool elevation = gameObject.layer != 8;
-        List<RaycastHit2D> hit2Ds = new List<RaycastHit2D>();
-        ContactFilter2D contactFilter2D = new ContactFilter2D();
-        Physics2D.CircleCast(transform.position, 1.7f, transform.position - transform.position, contactFilter2D, hit2Ds);
-        HexagonControl hexagonControl = null;//нужный 6-ти угольник  
-        float Magnitude = 0;
-
-        for (int i = 0; i < hit2Ds.Count; i++)
-        {
-            var getHex = hit2Ds[i].collider.GetComponent<HexagonControl>();
-            if (getHex.FreedomTestType(elevation))
-            {
-                if (hexagonControl == null)
-                {
-                    Magnitude = (new Vector2(hit2Ds[i].transform.position.x, hit2Ds[i].transform.position.y) - new Vector2(transform.position.x, transform.position.y)).magnitude;
-                    hexagonControl = getHex;
-                }
-
-                if (Magnitude > (new Vector2(hit2Ds[i].transform.position.x, hit2Ds[i].transform.position.y) - new Vector2(transform.position.x, transform.position.y)).magnitude)
-                {
-                    Magnitude = (new Vector2(hit2Ds[i].transform.position.x, hit2Ds[i].transform.position.y) - new Vector2(transform.position.x, transform.position.y)).magnitude;
-                    hexagonControl = getHex;
-                }
-            }
-        }
-        return hexagonControl;
-    }
+    public HexagonControl FieldPosition()//гексагон к которому принадлежит герой (надо переделать)
+    {       
+        HexagonControl[] hexagonControl = MapControlStatic.GetPositionOnTheMap(0.1f,transform.position);//нужный 6-ти угольник  
+        return hexagonControl[0];
+    } 
     private IEnumerator Movement()//коротина движения
     {
         IsGo = true;
@@ -96,7 +72,7 @@ public class Navigation : MonoBehaviour
         List<HexagonControl> ListOfNecessaryVertices = new List<HexagonControl>();
         List<HexagonControl> ListHexgon = new List<HexagonControl>();
 
-        List<HexagonControl> CollisionHexagon = new List<HexagonControl>();
+        //List<HexagonControl> CollisionHexagon = new List<HexagonControl>();
         if (elevation)
         {
             if (!MapControlStatic.CollisionCheckElevation(startingPoint.position, hexagon.transform.position, elevation))
@@ -117,7 +93,7 @@ public class Navigation : MonoBehaviour
         {
             if (!MapControlStatic.CollisionCheck(startingPoint.position, hexagon.transform.position, elevation))
             {
-                Debug.Log(1);
+                //Debug.Log(1);
                 //IsStraightWay = false;
                 ListHexgon.Add(FieldPosition());
                 ListHexgon.AddRange(_listVertex);
@@ -130,7 +106,6 @@ public class Navigation : MonoBehaviour
                 ListOfNecessaryVertices.Add(hexagon);
             }
         }
-
         return ListOfNecessaryVertices;
     }
     private List<HexagonControl> BreakingTheDeadlock(List<HexagonControl> listHexagons)//выстравивает пути обхода
@@ -169,6 +144,7 @@ public class Navigation : MonoBehaviour
                 if (listHexagons[i].TypeHexagon <= 0 || (listHexagons[i].TypeHexagon == 3 && graph[j].NodeHexagon.gameObject.layer != 10))
                 {
                     //Debug.Log(1);
+                    IsElevation = false;
                     if (!MapControlStatic.CollisionCheck(StartPosition, direction, IsElevation))
                     {
                          NoRibs = true;
@@ -177,7 +153,7 @@ public class Navigation : MonoBehaviour
                 else
                 {
                     //Debug.Log(2);
-
+                    //graph[i].NodeHexagon.Flag();
                     IsElevation = true;
                     if (!MapControlStatic.CollisionCheckElevation(StartPosition, direction, IsElevation))
                     {
@@ -188,16 +164,13 @@ public class Navigation : MonoBehaviour
 
                 float distance = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
 
-                //Vector2 StartPosition = graph[i].NodeHexagon.transform.position;
-                //Vector2 direction = -(graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).normalized;
-                //Physics2D.CircleCast(StartPosition, 0.1f, direction, contactFilter2D, hit2Ds, distance);
-
                 if (!NoRibs)
                 {
                     //Debug.Log(2222);
                     float magnitude = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
                     graph[i].Connect(graph[j], magnitude);
-                }
+                } 
+
                 if (IsEnemyOnTheWay)
                 {
                     //ListVertexEnemy.Add(graph[i].NodeHexagon);
@@ -206,13 +179,14 @@ public class Navigation : MonoBehaviour
                 }
             }
         }
-        if (DictionaryEnemyVertex.Count > 0)
-        {
-            for (int i = 0; i < DictionaryEnemyVertex.Count; i++)
-            {
 
-            }
-        }
+        //if (DictionaryEnemyVertex.Count > 0)
+        //{
+        //    for (int i = 0; i < DictionaryEnemyVertex.Count; i++)
+        //    {
+
+        //    }
+        //}
         //Debug.Log(DictionaryEnemyVertex.Count);
         return graph;
     }

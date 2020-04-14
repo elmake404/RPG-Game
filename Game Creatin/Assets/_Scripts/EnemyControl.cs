@@ -9,10 +9,11 @@ public class EnemyControl : MonoBehaviour
     private HexagonControl _hexagonTarget;
     bool GG;
 
-    public Navigation Navigation;
+    public NavigationBot NavigationBot;
 
     void Start()
     {
+        NavigationBot.StartWay(MapControlStatic.mapNav[0,0]);
         //Navigation.FieldPosition().Flag();
     }
 
@@ -23,24 +24,24 @@ public class EnemyControl : MonoBehaviour
         //    GG = !GG;
         //}
         ////if(GG)
-        if (_heroTarget==null)
-        {
-            _heroTarget = SearchForTheClosestHero();
-        }
-        else if (_hexagonTarget != _heroTarget.NavigationHero.FieldPosition())
-        {
-            _hexagonTarget = _heroTarget.NavigationHero.FieldPosition();
-            if (gameObject.layer == 8)
-            {
-                Navigation.StartWay(_hexagonTarget.FieldPosition(transform));
-            }
-            else
-            {
-                Navigation.StartWayElevation(_hexagonTarget.FieldPosition(transform));
-            }
-            //_hexagonTarget.FieldPosition(transform).Flag();
-            //_hexagonTarget.Flag();
-        }
+        //if (_heroTarget==null)
+        //{
+        //    _heroTarget = SearchForTheClosestHero();
+        //}
+        //else if (_hexagonTarget != _heroTarget.NavigationHero.FieldPosition())
+        //{
+        //    _hexagonTarget = _heroTarget.NavigationHero.FieldPosition();
+        //    if (gameObject.layer == 8)
+        //    {
+        //        Navigation.StartWay(_hexagonTarget.FieldPosition(transform));
+        //    }
+        //    else
+        //    {
+        //        Navigation.StartWayElevation(_hexagonTarget.FieldPosition(transform));
+        //    }
+        //    //_hexagonTarget.FieldPosition(transform).Flag();
+        //    //_hexagonTarget.Flag();
+        //}
     }
 
     private HeroControl SearchForTheClosestHero()    //непродуман случай где лист героев пуст
