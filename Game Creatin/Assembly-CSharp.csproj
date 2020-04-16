@@ -63,16 +63,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\_Scripts\AlgorithmDijkstra.cs" />
-    <Compile Include="Assets\_Scripts\EnemyControl.cs" />
-    <Compile Include="Assets\_Scripts\Graph.cs" />
+    <Compile Include="Assets\_Scripts\Computation\AlgorithmDijkstra.cs" />
+    <Compile Include="Assets\_Scripts\Computation\AnApproacData.cs" />
+    <Compile Include="Assets\_Scripts\Computation\Graph.cs" />
+    <Compile Include="Assets\_Scripts\Enemy\EnemyControl.cs" />
+    <Compile Include="Assets\_Scripts\Enemy\EnemyManager.cs" />
     <Compile Include="Assets\_Scripts\HeroControl.cs" />
-    <Compile Include="Assets\_Scripts\HexagonControl.cs" />
-    <Compile Include="Assets\_Scripts\MapControl.cs" />
-    <Compile Include="Assets\_Scripts\MapControlStatic.cs" />
-    <Compile Include="Assets\_Scripts\Navigation.cs" />
-    <Compile Include="Assets\_Scripts\NavigationBot.cs" />
-    <Compile Include="Assets\_Scripts\pg.cs" />
+    <Compile Include="Assets\_Scripts\Map\HexagonControl.cs" />
+    <Compile Include="Assets\_Scripts\Map\MapControl.cs" />
+    <Compile Include="Assets\_Scripts\Map\MapControlStatic.cs" />
+    <Compile Include="Assets\_Scripts\Navigation\Navigation.cs" />
+    <Compile Include="Assets\_Scripts\Navigation\NavigationBot.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\AnimationEvents.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\BowShooting.cs" />

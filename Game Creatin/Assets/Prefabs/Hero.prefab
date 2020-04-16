@@ -128,8 +128,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50a7b54e4248ea1458fa5335b3d4595b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 6294914234715882394}
   NavigationHero: {fileID: 1079215778108624622}
+  Animator: {fileID: 6294914234715882394}
 --- !u!114 &1079215778108624622
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -6,6 +6,7 @@ public class NavigationBot : MonoBehaviour
 {
     private IEnumerator MoveCorotine;
     private List<HexagonControl> ListPoints = new List<HexagonControl>();//точки через который надо пройти 
+    private AlgorithmDijkstra algorithmDijkstra = new AlgorithmDijkstra();
 
     [SerializeField]
     private float _speed;
@@ -25,14 +26,16 @@ public class NavigationBot : MonoBehaviour
         ListPoints.Clear();
         while (PointList.Count > 0)
         {
-            transform.position = Vector2.MoveTowards(transform.position, PointList[0].transform.position, _speed);
+            HexagonControl newHex = PointList[0].Elevation != null ? PointList[0].Elevation : PointList[0];
+            Vector2 positionCurrent = newHex.transform.position;
+            transform.position = Vector2.MoveTowards(transform.position, positionCurrent, _speed);
             Vector2 positionMain = transform.position;
-            Vector2 positionCurrent = PointList[0].transform.position;
-            if (PointList[0].TypeHexagon == 2 && gameObject.layer == 8)
+            //= PointList[0].transform.position;
+            if (newHex.TypeHexagon == 2 && gameObject.layer == 8)
             {
                 gameObject.layer = 11;
             }
-            else if (PointList[0].TypeHexagon == 0 && gameObject.layer == 11)
+            else if (newHex.TypeHexagon == 0 && gameObject.layer == 11)
             {
                 gameObject.layer = 8;
             }
@@ -42,15 +45,14 @@ public class NavigationBot : MonoBehaviour
             }
             yield return new WaitForSeconds(0.02f);
         }
+        StartWay(MapControlStatic.mapNav[Random.Range(0,5), Random.Range(0,6)]);
     }
 
     private List<HexagonControl> SearchForAWay(HexagonControl hexagon)//возврашет все вершины по которым надо пройти 
     {
-        Graph graphMain = MapControlStatic.GraphStatic;
+        Graph graphMain = new Graph( MapControlStatic.GraphStatic);
+        graphMain.AddNodeFirst(FieldPosition());
         graphMain.AddNode(hexagon);
-        graphMain.AddNode(FieldPosition());
-        CreatingEdge(graphMain);
-        AlgorithmDijkstra algorithmDijkstra = new AlgorithmDijkstra();
 
         List<Node> nodesList = algorithmDijkstra.Dijkstra(CreatingEdge(graphMain));
 
@@ -65,18 +67,17 @@ public class NavigationBot : MonoBehaviour
     }
     private Graph CreatingEdge(Graph graph)
     {
-        int NamberElement = graph.Length;
+        int NamberElement = -(graph.Length-1);
 
         for (int i = 0; i < 2; i++)
         {
-            NamberElement -=1;
+            NamberElement += (graph.Length - 1);
             bool IsElevation = false;
 
             for (int j = 0; j < graph.Length; j++)
             {
                 if (graph[NamberElement]== graph[j])
                 {
-                    Debug.Log("continue");
                     continue;
                 }
 
@@ -87,7 +88,6 @@ public class NavigationBot : MonoBehaviour
 
                 if (graph[NamberElement].NodeHexagon.TypeHexagon <= 0 || (graph[NamberElement].NodeHexagon.TypeHexagon == 3 && graph[j].NodeHexagon.gameObject.layer != 10))
                 {
-                    //Debug.Log(1);
                     IsElevation = false;
                     if (!MapControlStatic.CollisionCheck(StartPosition, direction, IsElevation))
                     {
@@ -96,8 +96,6 @@ public class NavigationBot : MonoBehaviour
                 }
                 else
                 {
-                    //Debug.Log(2);
-                    //graph[i].NodeHexagon.Flag();
                     IsElevation = true;
                     if (!MapControlStatic.CollisionCheckElevation(StartPosition, direction, IsElevation))
                     {
@@ -110,7 +108,6 @@ public class NavigationBot : MonoBehaviour
 
                 if (!NoRibs)
                 {
-                    //Debug.Log(2222);
                     float magnitude = (graph[NamberElement].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
                     graph[NamberElement].Connect(graph[j], magnitude);
                 }
@@ -128,7 +125,6 @@ public class NavigationBot : MonoBehaviour
     {
         StopCoroutine(MoveCorotine);
         ListPoints.Clear();
-        //LayerMask layerMask = LayerMask.GetMask("Hero", "Hexagon", "HeroElevation", "Elevation");
         ListPoints.AddRange(SearchForAWay(hexagonFinish));
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);

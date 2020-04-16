@@ -6,17 +6,15 @@ public class Navigation : MonoBehaviour
 {
     private IEnumerator MoveCorotine;
     private List<HexagonControl> ListPoints = new List<HexagonControl>();//точки через который надо пройти 
-
+    private HeroControl _heroMain;
+    private AlgorithmDijkstra _algorithmDijkstra = new AlgorithmDijkstra();
 
     [SerializeField]
     private float _speed;
     //private int _namberPoint;
     private List<HexagonControl> _listVertex;
-    bool GG;
     [System.NonSerialized]
     public int HexagonRow = 0, HexagonColumn = 0;
-    [HideInInspector]
-    public bool IsGo;
 
     void Start()
     {
@@ -29,33 +27,32 @@ public class Navigation : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            GG = !GG;
-        }
 
     }
-    public HexagonControl FieldPosition()//гексагон к которому принадлежит герой (надо переделать)
-    {       
-        HexagonControl[] hexagonControl = MapControlStatic.GetPositionOnTheMap(0.1f,transform.position);//нужный 6-ти угольник  
+    public HexagonControl FieldPosition()//гексагон к которому принадлежит герой 
+    {
+        Vector3 difference = gameObject.layer == 8 ? Vector3.zero : new Vector3(MapControlStatic.X,MapControlStatic.Y,0);
+        HexagonControl[] hexagonControl = MapControlStatic.GetPositionOnTheMap(0.1f,transform.position-difference);//нужный 6-ти угольник  
         return hexagonControl[0];
     } 
     private IEnumerator Movement()//коротина движения
     {
-        IsGo = true;
+        _heroMain.Animator.SetBool("Run", true);
         List<HexagonControl> PointList = new List<HexagonControl>();
         PointList.AddRange(ListPoints);
         ListPoints.Clear();
         while (PointList.Count > 0)
         {
-            transform.position = Vector2.MoveTowards(transform.position, PointList[0].transform.position, _speed);
+            HexagonControl newHex = PointList[0].GetHexagonMain();
+            Vector2 positionCurrent = newHex.transform.position;
+            transform.position = Vector2.MoveTowards(transform.position, positionCurrent, _speed);
             Vector2 positionMain = transform.position;
-            Vector2 positionCurrent = PointList[0].transform.position;
-            if (PointList[0].TypeHexagon == 2 && gameObject.layer == 8)
+             //= PointList[0].transform.position;
+            if (newHex.TypeHexagon == 2 && gameObject.layer == 8)
             {
                 gameObject.layer = 11;
             }
-            else if (PointList[0].TypeHexagon == 0 && gameObject.layer == 11)
+            else if (newHex.TypeHexagon == 0 && gameObject.layer == 11)
             {
                 gameObject.layer = 8;
             }
@@ -65,19 +62,17 @@ public class Navigation : MonoBehaviour
             }
             yield return new WaitForSeconds(0.02f);
         }
-        IsGo = false;
+        _heroMain.Animator.SetBool("Run", false);
     }
     private List<HexagonControl> SearchForAWay(HexagonControl hexagon, Transform startingPoint, bool elevation)//возврашет все вершины по которым надо пройти 
     {
         List<HexagonControl> ListOfNecessaryVertices = new List<HexagonControl>();
         List<HexagonControl> ListHexgon = new List<HexagonControl>();
 
-        //List<HexagonControl> CollisionHexagon = new List<HexagonControl>();
         if (elevation)
         {
             if (!MapControlStatic.CollisionCheckElevation(startingPoint.position, hexagon.transform.position, elevation))
             {
-                Debug.Log(23);
                 ListHexgon.Add(FieldPosition());
                 ListHexgon.AddRange(_listVertex);
 
@@ -93,8 +88,6 @@ public class Navigation : MonoBehaviour
         {
             if (!MapControlStatic.CollisionCheck(startingPoint.position, hexagon.transform.position, elevation))
             {
-                //Debug.Log(1);
-                //IsStraightWay = false;
                 ListHexgon.Add(FieldPosition());
                 ListHexgon.AddRange(_listVertex);
 
@@ -110,8 +103,7 @@ public class Navigation : MonoBehaviour
     }
     private List<HexagonControl> BreakingTheDeadlock(List<HexagonControl> listHexagons)//выстравивает пути обхода
     {
-        AlgorithmDijkstra algorithmDijkstra = new AlgorithmDijkstra();
-        List<Node> nodesList = algorithmDijkstra.Dijkstra(CreatingEdge(listHexagons, true));
+        List<Node> nodesList = _algorithmDijkstra.Dijkstra(CreatingEdge(listHexagons, true));
 
         List<HexagonControl> ListVertex = new List<HexagonControl>();
 
@@ -122,12 +114,10 @@ public class Navigation : MonoBehaviour
 
         return ListVertex;
     }
-    private Graph CreatingEdge(List<HexagonControl> listHexagons, bool IsConsiderEnemy)
+    private Graph CreatingEdge(List<HexagonControl> listHexagons, bool IsConsiderEnemy)//выстраивает ребра в графе 
     {
         var graph = new Graph(listHexagons);
-        var DictionaryEnemyVertex = new Dictionary<int, List<HexagonControl>>();
 
-        //Debug.Log(graph.Length);
         for (int i = 0; i < graph.Length - 1; i++)
         {
             bool IsElevation = false;
@@ -138,12 +128,12 @@ public class Navigation : MonoBehaviour
                 Vector2 StartPosition = graph[i].NodeHexagon.transform.position;
                 Vector2 direction =  graph[j].NodeHexagon.transform.position;
 
-                bool IsEnemyOnTheWay = false;
+                //bool IsEnemyOnTheWay = false;
                 bool NoRibs = false;
+                HexagonControl node = graph[j].NodeHexagon.Elevation != null? graph[j].NodeHexagon.Elevation: graph[j].NodeHexagon;
 
-                if (listHexagons[i].TypeHexagon <= 0 || (listHexagons[i].TypeHexagon == 3 && graph[j].NodeHexagon.gameObject.layer != 10))
+                if (listHexagons[i].TypeHexagon <= 0 || (listHexagons[i].TypeHexagon == 3 && node.gameObject.layer != 10))
                 {
-                    //Debug.Log(1);
                     IsElevation = false;
                     if (!MapControlStatic.CollisionCheck(StartPosition, direction, IsElevation))
                     {
@@ -152,8 +142,6 @@ public class Navigation : MonoBehaviour
                 }
                 else
                 {
-                    //Debug.Log(2);
-                    //graph[i].NodeHexagon.Flag();
                     IsElevation = true;
                     if (!MapControlStatic.CollisionCheckElevation(StartPosition, direction, IsElevation))
                     {
@@ -161,33 +149,21 @@ public class Navigation : MonoBehaviour
                     }
                 }
 
-
-                float distance = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
-
                 if (!NoRibs)
                 {
-                    //Debug.Log(2222);
                     float magnitude = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
                     graph[i].Connect(graph[j], magnitude);
                 } 
 
-                if (IsEnemyOnTheWay)
-                {
-                    //ListVertexEnemy.Add(graph[i].NodeHexagon);
-                    //ListVertexEnemy.Add(graph[j].NodeHexagon);
-                    //DictionaryEnemyVertex[DictionaryEnemyVertex.Count] = ListVertexEnemy;
-                }
+                //if (IsEnemyOnTheWay)
+                //{
+                //    //ListVertexEnemy.Add(graph[i].NodeHexagon);
+                //    //ListVertexEnemy.Add(graph[j].NodeHexagon);
+                //    //DictionaryEnemyVertex[DictionaryEnemyVertex.Count] = ListVertexEnemy;
+                //}
             }
         }
 
-        //if (DictionaryEnemyVertex.Count > 0)
-        //{
-        //    for (int i = 0; i < DictionaryEnemyVertex.Count; i++)
-        //    {
-
-        //    }
-        //}
-        //Debug.Log(DictionaryEnemyVertex.Count);
         return graph;
     }
     public void StartWay(HexagonControl hexagonFinish)
@@ -195,9 +171,8 @@ public class Navigation : MonoBehaviour
         //всегда вноси новый слой
         StopCoroutine(MoveCorotine);
         ListPoints.Clear();
-
-        //LayerMask layerMask = LayerMask.GetMask("Hero", "Hexagon", "LowerBarrier");
-        ListPoints.AddRange(SearchForAWay(hexagonFinish, transform, false));
+        HexagonControl hexagon = hexagonFinish.Floor != null ? hexagonFinish.Floor : hexagonFinish;
+        ListPoints.AddRange(SearchForAWay(hexagon, transform, false));
 
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
@@ -206,15 +181,18 @@ public class Navigation : MonoBehaviour
     {
         StopCoroutine(MoveCorotine);
         ListPoints.Clear();
-        //LayerMask layerMask = LayerMask.GetMask("Hero", "Hexagon", "HeroElevation", "Elevation");
-        ListPoints.AddRange(SearchForAWay(hexagonFinish, transform, true));
+        HexagonControl hexagon = hexagonFinish.Floor != null ? hexagonFinish.Floor : hexagonFinish;
+
+        ListPoints.AddRange(SearchForAWay(hexagon, transform, true));
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
     }
-    public void InitializationVertex(HexagonControl[] hexagons)
+    public void Initialization(HexagonControl[] hexagons,HeroControl hero)
     {
+        _heroMain = hero;
         _listVertex = new List<HexagonControl>();
         _listVertex.AddRange(hexagons);
+
     }
 
     public void StopMove()

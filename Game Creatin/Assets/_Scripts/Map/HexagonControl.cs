@@ -7,7 +7,7 @@ public class HexagonControl : MonoBehaviour
     [SerializeField]
     private GameObject _flag;
 
-    public HexagonControl Elevstion, Floor;
+    public HexagonControl Elevation, Floor;
     [System.NonSerialized]
     public int Row, Column;
 
@@ -17,9 +17,14 @@ public class HexagonControl : MonoBehaviour
     //float mag,  mag2;
     private void Awake()
     {
-        if (Elevstion != null)
+        if (Elevation != null)
         {
-            Elevstion.Floor = this;
+            Elevation.Floor = this;
+            if (MapControlStatic.X == 0 && MapControlStatic.Y == 0)
+            {
+                MapControlStatic.X = Elevation.transform.position.x - transform.position.x;
+                MapControlStatic.Y = Elevation.transform.position.y - transform.position.y;
+            }
         }
     }
     void Start()
@@ -135,5 +140,41 @@ public class HexagonControl : MonoBehaviour
     public void Flag()
     {
         Instantiate(_flag, transform);
+    }
+    public HexagonControl GetHexagonMain(bool elevation)
+    {
+        if (Elevation!=null)
+        {
+            if (!Elevation.FreedomTestType(elevation))
+            {
+                return null;
+            }
+            else
+            {
+                return Elevation;
+            }
+        }
+        else
+        {
+            if (!FreedomTestType(elevation))
+            {
+                return null;
+            }
+            else
+            {
+                return this;
+            }
+        }
+    }
+    public HexagonControl GetHexagonMain()
+    {
+        if (Elevation!=null )
+        {
+            return Elevation;
+        }
+        else
+        {
+            return this;
+        }
     }
 }

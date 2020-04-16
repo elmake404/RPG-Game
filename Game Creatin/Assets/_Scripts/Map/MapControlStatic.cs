@@ -8,6 +8,7 @@ public static class MapControlStatic
     public static HexagonControl[,] mapNav = new HexagonControl[9, 20];//масив содержащий все 6-ти угольники
     //public static HexagonControl[] Elevation;
     public static Graph GraphStatic;
+    public static float X, Y;
     public static bool CollisionCheck(Vector2 StartPos, Vector2 TargetPos, bool elevation)
     {
         HexagonControl[] controls = null;
@@ -46,9 +47,9 @@ public static class MapControlStatic
                 Vector2 PosHex = controls[i].transform.position;
                 if ((PosHex - currentVector).magnitude <= 1.8)
                 {
-                    if (controls[i].Elevstion!=null)
+                    if (controls[i].Elevation!=null)
                     {                    
-                        if (!controls[i].Elevstion.FreedomTestType(elevation))
+                        if (!controls[i].Elevation.FreedomTestType(elevation))
                         {
                             Debug.Log(elevation);
 

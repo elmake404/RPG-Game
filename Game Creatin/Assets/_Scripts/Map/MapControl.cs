@@ -32,7 +32,7 @@ public class MapControl : MonoBehaviour
         }
         for (int i = 0; i < _heroControls.Length; i++)
         {
-            _heroControls[i].NavigationHero.InitializationVertex(_arreyVertex);
+            _heroControls[i].InitializationVertexNavigation(_arreyVertex);
         }
         GraphRecord();
 
@@ -81,10 +81,6 @@ public class MapControl : MonoBehaviour
                         NoRibs = true;
                     }
                 }
-
-
-                float distance = (MapControlStatic.GraphStatic[i].NodeHexagon.transform.position - MapControlStatic.GraphStatic[j].NodeHexagon.transform.position).magnitude;
-
                 if (!NoRibs)
                 {
                     float magnitude = (MapControlStatic.GraphStatic[i].NodeHexagon.transform.position - MapControlStatic.GraphStatic[j].NodeHexagon.transform.position).magnitude;

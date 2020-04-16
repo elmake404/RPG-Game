@@ -30,7 +30,7 @@ public class Edge
 public class Node
 {
     private readonly List<Edge> incidentEdge = new List<Edge>();
-    public readonly int NodeNumber;
+    public int NodeNumber;
     public readonly HexagonControl NodeHexagon;
 
     public Node(int number,HexagonControl main)
@@ -76,9 +76,26 @@ public class Graph
             nodes.Add(new Node(i, ListHexagon[i]));
         }
     }
+    public Graph(Graph graph)
+    {
+        nodes = new List<Node>();
+
+        for (int i = 0; i < graph.Length; i++)
+        {
+            nodes.Add(graph[i]);
+        }
+    }
     public void AddNode(HexagonControl newNode)
     {
         nodes.Add(new Node(nodes.Count-1, newNode));
+    }
+    public void AddNodeFirst(HexagonControl newNode)
+    {
+        nodes.Insert(0, new Node(0, newNode));
+        for (int i = 1; i < nodes.Count; i++)
+        {
+            nodes[i].NodeNumber += 1;
+        }
     }
 
     public int Length
