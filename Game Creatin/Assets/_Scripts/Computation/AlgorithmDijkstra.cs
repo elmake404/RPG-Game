@@ -29,7 +29,8 @@ public class AlgorithmDijkstra
             }
             if (toOpen==null)
             {
-                Debug.LogError("Disconnected graph");
+                Debug.Log("Disconnected graph");
+                return null;
             }
             if (toOpen == graph[graph.Length - 1])
             {
@@ -57,7 +58,7 @@ public class AlgorithmDijkstra
         result.Reverse();
         return result;
     }
-    public List<Node> Dijkstra(Graph graph , out float totalPrice)
+    public List<HexagonControl> Dijkstra(Graph graph , out float totalPrice)
     {
         var notVisited = graph.GetListNodes();
         var track = new Dictionary<Node, DijkstraData>();
@@ -77,7 +78,9 @@ public class AlgorithmDijkstra
             }
             if (toOpen==null)
             {
-                Debug.LogError("Disconnected graph");
+                Debug.Log("Disconnected graph");
+                totalPrice = float.PositiveInfinity;
+                return null;
             }
             if (toOpen == graph[graph.Length - 1])
             {
@@ -95,14 +98,16 @@ public class AlgorithmDijkstra
             }
             notVisited.Remove(toOpen);
         }
-        var result = new List<Node>();
+        var result = new List<HexagonControl>();
         Node end = graph[graph.Length - 1];
         float Total = 0;
         while (end != null)
         {
-            result.Add(end);
+            if ((end != null))
+                Total += track[end].Price;
+
+            result.Add(end.NodeHexagon);
             end = track[end].Previous;
-            Total += track[end].Price;
         }
         totalPrice = Total;
         result.Reverse();

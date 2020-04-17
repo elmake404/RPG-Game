@@ -29,13 +29,13 @@ public class HexagonControl : MonoBehaviour
     }
     void Start()
     {
-        if (TypeHexagon != 2)
-        {
-            Row = System.Convert.ToInt32
-                (transform.parent.name);
-            Column = System.Convert.ToInt32
-                (name);
-        }
+        //if (TypeHexagon != 2)
+        //{
+        //    Row = System.Convert.ToInt32
+        //        (transform.parent.name);
+        //    Column = System.Convert.ToInt32
+        //        (name);
+        //}
         //if (Floor != null)
         //{
         //    Floor.Flag();
@@ -175,6 +175,16 @@ public class HexagonControl : MonoBehaviour
         else
         {
             return this;
+        }
+    }
+    public void NamberHex()
+    {
+        if (TypeHexagon != 2)
+        {
+            Row = System.Convert.ToInt32
+                (transform.parent.name);
+            Column = System.Convert.ToInt32
+                (name);
         }
     }
 }

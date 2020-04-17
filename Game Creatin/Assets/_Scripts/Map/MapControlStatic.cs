@@ -35,7 +35,7 @@ public static class MapControlStatic
     }
     public static bool CollisionCheckElevation(Vector2 StartPos, Vector2 TargetPos, bool elevation)
     {
-       HexagonControl[] controls = null;
+        HexagonControl[] controls = null;
 
         Vector2 currentVector = StartPos;
 
@@ -47,8 +47,8 @@ public static class MapControlStatic
                 Vector2 PosHex = controls[i].transform.position;
                 if ((PosHex - currentVector).magnitude <= 1.8)
                 {
-                    if (controls[i].Elevation!=null)
-                    {                    
+                    if (controls[i].Elevation != null)
+                    {
                         if (!controls[i].Elevation.FreedomTestType(elevation))
                         {
                             Debug.Log(elevation);
@@ -117,5 +117,48 @@ public static class MapControlStatic
             hexagons[0] = mapNav[(int)Y, XInt];
             return hexagons;
         }
+    }
+    public static HexagonControl GetPositionOnTheMap(Vector2 Position)
+    {
+        float Y = (Position.y - MapPos.y) / 3f;
+        int YMax = Mathf.Abs(Mathf.RoundToInt(Y));
+        float Difference = 0;
+        float f = ((Position.x - (MapPos.x - 3.46f)) / 1.73f);
+        float R = Mathf.Floor(f) * 1.73f - (Position.x - (MapPos.x - 3.46f));
+        int G = R % 2 == 0 ? -1 : 0;
+
+        if (Mathf.Abs(YMax - Mathf.Abs(Y)) < 1 - (G + (0.3f + ((0.3 / 1.73) * Mathf.Abs(R)))))
+        {
+            Y = Mathf.Round(Mathf.Abs(Y));
+        }
+        else
+        {
+            if (YMax - Mathf.Abs(Y) > 0)
+            {
+                Y = Mathf.Floor(Mathf.Abs(Y));
+            }
+            else
+            {
+                Y = Mathf.Ceil(Mathf.Abs(Y));
+            }
+        }
+
+        if ((Y % 2) != 0)
+        {
+            Difference = 0.5f;
+        }
+        float factor = (mapNav[0, 1].transform.position.x - mapNav[0, 0].transform.position.x);
+        float X = ((Position.x - MapPos.x) / factor) + Difference;
+
+        X = X > 0 ? X : 0;
+        int XInt = Mathf.RoundToInt(X);
+        HexagonControl hexagons = mapNav[(int)Y, XInt];
+        return hexagons;
+    }
+    public static HexagonControl FieldPosition(int layer, Vector2 position)//гексагон к которому принадлежит герой (надо переделать)
+    {
+        Vector2 difference = layer == 8 ? Vector2.zero : new Vector2(X, Y);
+
+        return GetPositionOnTheMap(position - difference);//нужный 6-ти угольник  
     }
 }

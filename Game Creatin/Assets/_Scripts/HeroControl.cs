@@ -20,7 +20,8 @@ public class HeroControl : MonoBehaviour
     }
     private void Start()
     {
-        Invoke("RecordApproac", 0.5f);
+        RecordApproac();
+        //Invoke("RecordApproac", 0.5f);
     }
 
     private void Update()
@@ -28,9 +29,9 @@ public class HeroControl : MonoBehaviour
     }
     private void RecordApproac()
     {
-        bool elevation = gameObject.layer != 8 ;
-        Debug.Log(elevation);
-        HexagonControl hexagon = NavigationHero.FieldPosition();
+        bool elevation = gameObject.layer != 8;
+        HexagonControl hexagon = MapControlStatic.FieldPosition(gameObject.layer, transform.position);
+
         if (hexagon.Row != 0)
         {
             AnApproac[0].hexagon = MapControlStatic.mapNav[hexagon.Row - 1, hexagon.Column].GetHexagonMain(elevation);
@@ -74,7 +75,7 @@ public class HeroControl : MonoBehaviour
             AnApproac[2].hexagon = null;
         }
 
-        if (hexagon.Column <MapControlStatic.mapNav.GetLength(1) - 1)
+        if (hexagon.Column < MapControlStatic.mapNav.GetLength(1) - 1)
         {
             AnApproac[3].hexagon = MapControlStatic.mapNav[hexagon.Row, hexagon.Column + 1].GetHexagonMain(elevation);
         }
@@ -83,8 +84,9 @@ public class HeroControl : MonoBehaviour
             AnApproac[3].hexagon = null;
         }
 
-        if (hexagon.Row != 0)
+        if (hexagon.Row < MapControlStatic.mapNav.GetLength(0) - 1)
         {
+            //Debug.Log(hexagon.Row);
             AnApproac[4].hexagon = MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column].GetHexagonMain(elevation);
 
             if ((hexagon.Row % 2) == 0)
@@ -106,24 +108,50 @@ public class HeroControl : MonoBehaviour
                 }
                 else
                 {
-                    //Debug.Log()
                     AnApproac[5].hexagon = null;
                 }
 
             }
         }
 
+        //for (int i = 0; i < AnApproac.Count; i++)
+        //{
+        //    if (AnApproac[i].hexagon != null)
+        //    {
+        //        AnApproac[i].hexagon.Flag();
+        //    }
+        //    else
+        //    {
+        //        Debug.Log(i);
+        //    }
+        //}
+    }
+
+    public bool IsFreePlace()
+    {
         for (int i = 0; i < AnApproac.Count; i++)
         {
-            if (AnApproac[i].hexagon != null)
+            if (AnApproac[i].Suitability())
             {
-                AnApproac[i].hexagon.Flag();
+                return true;
             }
-            //else
-            //{
-            //    Debug.Log(i);
-            //}
         }
+        return false;
+    }
+    public HexagonControl FreePlace(EnemyControl enemyControl)
+    {
+        HexagonControl hexagon = null;
+        for (int i = 0; i < AnApproac.Count; i++)
+        {
+            if (AnApproac[i].Suitability())
+            {
+                hexagon = AnApproac[i].hexagon;
+                AnApproac[i].busy = true;
+                AnApproac[i].enemy = enemyControl;
+                break;
+            }
+        }
+        return hexagon;
     }
     public void StartWay(HexagonControl hexagonFinish)
     {

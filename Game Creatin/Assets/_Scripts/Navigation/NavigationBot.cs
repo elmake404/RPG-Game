@@ -45,16 +45,21 @@ public class NavigationBot : MonoBehaviour
             }
             yield return new WaitForSeconds(0.02f);
         }
-        StartWay(MapControlStatic.mapNav[Random.Range(0,5), Random.Range(0,6)]);
+        //StartWay(MapControlStatic.mapNav[Random.Range(0,5), Random.Range(0,6)]);
     }
 
     private List<HexagonControl> SearchForAWay(HexagonControl hexagon)//возврашет все вершины по которым надо пройти 
     {
         Graph graphMain = new Graph( MapControlStatic.GraphStatic);
-        graphMain.AddNodeFirst(FieldPosition());
+        graphMain.AddNodeFirst(MapControlStatic.FieldPosition(gameObject.layer,transform.position));
         graphMain.AddNode(hexagon);
 
         List<Node> nodesList = algorithmDijkstra.Dijkstra(CreatingEdge(graphMain));
+
+        if (nodesList == null)
+        {
+            return null;
+        }
 
         List<HexagonControl> ListVertex = new List<HexagonControl>();
 
@@ -115,17 +120,24 @@ public class NavigationBot : MonoBehaviour
         }
         return graph;
     }
-    public HexagonControl FieldPosition()//гексагон к которому принадлежит герой (надо переделать)
-    {
-        HexagonControl[] hexagonControl = MapControlStatic.GetPositionOnTheMap(0.1f, transform.position);//нужный 6-ти угольник  
-        return hexagonControl[0];
-    }
+    //public HexagonControl FieldPosition()//гексагон к которому принадлежит герой (надо переделать)
+    //{
+    //    HexagonControl[] hexagonControl = MapControlStatic.GetPositionOnTheMap(0.1f, transform.position);//нужный 6-ти угольник  
+    //    return hexagonControl[0];
+    //}
 
     public void StartWay(HexagonControl hexagonFinish)
     {
         StopCoroutine(MoveCorotine);
         ListPoints.Clear();
         ListPoints.AddRange(SearchForAWay(hexagonFinish));
+
+        if (ListPoints == null)
+        {
+            Debug.Log("No Way");
+            return;
+        }
+
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
     }

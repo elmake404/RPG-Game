@@ -29,12 +29,6 @@ public class Navigation : MonoBehaviour
     {
 
     }
-    public HexagonControl FieldPosition()//гексагон к которому принадлежит герой 
-    {
-        Vector3 difference = gameObject.layer == 8 ? Vector3.zero : new Vector3(MapControlStatic.X,MapControlStatic.Y,0);
-        HexagonControl[] hexagonControl = MapControlStatic.GetPositionOnTheMap(0.1f,transform.position-difference);//нужный 6-ти угольник  
-        return hexagonControl[0];
-    } 
     private IEnumerator Movement()//коротина движения
     {
         _heroMain.Animator.SetBool("Run", true);
@@ -47,7 +41,6 @@ public class Navigation : MonoBehaviour
             Vector2 positionCurrent = newHex.transform.position;
             transform.position = Vector2.MoveTowards(transform.position, positionCurrent, _speed);
             Vector2 positionMain = transform.position;
-             //= PointList[0].transform.position;
             if (newHex.TypeHexagon == 2 && gameObject.layer == 8)
             {
                 gameObject.layer = 11;
@@ -73,7 +66,7 @@ public class Navigation : MonoBehaviour
         {
             if (!MapControlStatic.CollisionCheckElevation(startingPoint.position, hexagon.transform.position, elevation))
             {
-                ListHexgon.Add(FieldPosition());
+                ListHexgon.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
                 ListHexgon.AddRange(_listVertex);
 
                 ListHexgon.Add(hexagon);
@@ -88,7 +81,7 @@ public class Navigation : MonoBehaviour
         {
             if (!MapControlStatic.CollisionCheck(startingPoint.position, hexagon.transform.position, elevation))
             {
-                ListHexgon.Add(FieldPosition());
+                ListHexgon.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
                 ListHexgon.AddRange(_listVertex);
 
                 ListHexgon.Add(hexagon);
@@ -104,7 +97,10 @@ public class Navigation : MonoBehaviour
     private List<HexagonControl> BreakingTheDeadlock(List<HexagonControl> listHexagons)//выстравивает пути обхода
     {
         List<Node> nodesList = _algorithmDijkstra.Dijkstra(CreatingEdge(listHexagons, true));
-
+        if (nodesList==null)
+        {
+            return null;
+        }
         List<HexagonControl> ListVertex = new List<HexagonControl>();
 
         for (int i = 1; i < nodesList.Count; i++)
@@ -128,7 +124,6 @@ public class Navigation : MonoBehaviour
                 Vector2 StartPosition = graph[i].NodeHexagon.transform.position;
                 Vector2 direction =  graph[j].NodeHexagon.transform.position;
 
-                //bool IsEnemyOnTheWay = false;
                 bool NoRibs = false;
                 HexagonControl node = graph[j].NodeHexagon.Elevation != null? graph[j].NodeHexagon.Elevation: graph[j].NodeHexagon;
 
@@ -154,13 +149,6 @@ public class Navigation : MonoBehaviour
                     float magnitude = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
                     graph[i].Connect(graph[j], magnitude);
                 } 
-
-                //if (IsEnemyOnTheWay)
-                //{
-                //    //ListVertexEnemy.Add(graph[i].NodeHexagon);
-                //    //ListVertexEnemy.Add(graph[j].NodeHexagon);
-                //    //DictionaryEnemyVertex[DictionaryEnemyVertex.Count] = ListVertexEnemy;
-                //}
             }
         }
 
@@ -174,6 +162,12 @@ public class Navigation : MonoBehaviour
         HexagonControl hexagon = hexagonFinish.Floor != null ? hexagonFinish.Floor : hexagonFinish;
         ListPoints.AddRange(SearchForAWay(hexagon, transform, false));
 
+        if (ListPoints == null)
+        {
+            Debug.Log("No Way");
+            return;
+        }
+
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
     }
@@ -184,6 +178,13 @@ public class Navigation : MonoBehaviour
         HexagonControl hexagon = hexagonFinish.Floor != null ? hexagonFinish.Floor : hexagonFinish;
 
         ListPoints.AddRange(SearchForAWay(hexagon, transform, true));
+
+        if (ListPoints==null)
+        {
+            Debug.Log("No Way");
+            return;
+        }
+
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
     }
@@ -194,7 +195,6 @@ public class Navigation : MonoBehaviour
         _listVertex.AddRange(hexagons);
 
     }
-
     public void StopMove()
     {
         StopCoroutine(MoveCorotine);

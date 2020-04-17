@@ -5,6 +5,8 @@ using UnityEngine;
 public class MapControl : MonoBehaviour
 {
     [SerializeField]
+    private EnemyManager enemyManager;
+    [SerializeField]
     private Transform[] hexagons;
     [SerializeField]
     private HeroControl[] _heroControls;
@@ -16,6 +18,7 @@ public class MapControl : MonoBehaviour
     void Awake()
     {
         MapControlStatic.MapPos = transform.position;
+        enemyManager.InitializationList(_heroControls,_enemyControls);
         //MapControlStatic.Elevation = new HexagonControl[_elevation.Length];
         //for (int i = 0; i < _elevation.Length; i++)
         //{
@@ -26,8 +29,10 @@ public class MapControl : MonoBehaviour
             hexagons[i].name = i.ToString();
             for (int j = 0; j < hexagons[i].childCount; j++)
             {
-                MapControlStatic.mapNav[i, j] = hexagons[i].GetChild(j).GetComponent<HexagonControl>();
+                HexagonControl hexagon = hexagons[i].GetChild(j).GetComponent<HexagonControl>();
+                MapControlStatic.mapNav[i, j] = hexagon;
                 hexagons[i].GetChild(j).name = j.ToString();
+                hexagon.NamberHex();
             }
         }
         for (int i = 0; i < _heroControls.Length; i++)
