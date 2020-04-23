@@ -8,6 +8,12 @@ public class AnApproacData
     public bool busy;
     public EnemyControl enemy;
 
+    public void Ban()
+    {
+        hexagon = null;
+        enemy = null;
+        busy = false;
+    }
     public bool Suitability()
     {
         if (hexagon != null && !busy)

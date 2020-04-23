@@ -2,24 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Navigation : MonoBehaviour
+public class Navigation : MonoBehaviour, IMove
 {
     private IEnumerator MoveCorotine;
     private List<HexagonControl> ListPoints = new List<HexagonControl>();//точки через который надо пройти 
     private HeroControl _heroMain;
+    private HexagonControl _targetHexagon;
     private AlgorithmDijkstra _algorithmDijkstra = new AlgorithmDijkstra();
+    private List<HexagonControl> _listVertex;
+    private Vector2 CurrentPos;
 
     [SerializeField]
     private float _speed;
-    //private int _namberPoint;
-    private List<HexagonControl> _listVertex;
+    private bool _isStop = false, _isMove;
     [System.NonSerialized]
     public int HexagonRow = 0, HexagonColumn = 0;
 
     void Start()
     {
         MoveCorotine = Movement();
-        if (_listVertex.Count <= 0)
+        _isMove = false;
+        if (_listVertex == null || _listVertex.Count == 0)
         {
             Debug.LogError("The lack of vertex in the hero");
         }
@@ -27,146 +30,175 @@ public class Navigation : MonoBehaviour
 
     void Update()
     {
+        if (_isStop)
+        {
+            BypassCheck();
+        }
 
     }
     private IEnumerator Movement()//коротина движения
     {
+        _isMove = true;
         _heroMain.Animator.SetBool("Run", true);
         List<HexagonControl> PointList = new List<HexagonControl>();
         PointList.AddRange(ListPoints);
         ListPoints.Clear();
+        _targetHexagon = PointList[0].Elevation != null ? PointList[0].Elevation : PointList[0];
         while (PointList.Count > 0)
         {
-            HexagonControl newHex = PointList[0].GetHexagonMain();
-            Vector2 positionCurrent = newHex.transform.position;
-            transform.position = Vector2.MoveTowards(transform.position, positionCurrent, _speed);
+            Vector2 positionCurrent = _targetHexagon.transform.position;
+            Vector2 Pos = Vector2.MoveTowards(transform.position, positionCurrent, _speed);
+            CurrentPos = Pos + (Vector2)(_targetHexagon.transform.position - transform.position).normalized * 1.8f;
+            _heroMain.Collision(CurrentPos, MoveCorotine);
+            transform.position = Pos;
             Vector2 positionMain = transform.position;
-            if (newHex.TypeHexagon == 2 && gameObject.layer == 8)
+            if (_targetHexagon.TypeHexagon == 2 && gameObject.layer == 8)
             {
                 gameObject.layer = 11;
             }
-            else if (newHex.TypeHexagon == 0 && gameObject.layer == 11)
+            else if (_targetHexagon.TypeHexagon == 0 && gameObject.layer == 11)
             {
                 gameObject.layer = 8;
             }
             if ((positionCurrent - positionMain).magnitude <= 0.001f)
             {
                 PointList.Remove(PointList[0]);
+                if (PointList.Count > 0)
+                {
+                    _targetHexagon = PointList[0].Elevation != null ? PointList[0].Elevation : PointList[0];
+                }
             }
             yield return new WaitForSeconds(0.02f);
         }
         _heroMain.Animator.SetBool("Run", false);
+        _isMove = false;
     }
     private List<HexagonControl> SearchForAWay(HexagonControl hexagon, Transform startingPoint, bool elevation)//возврашет все вершины по которым надо пройти 
     {
-        List<HexagonControl> ListOfNecessaryVertices = new List<HexagonControl>();
+        List<HexagonControl> ListOfNecessaryVertices;
         List<HexagonControl> ListHexgon = new List<HexagonControl>();
-
+        float Magnitude;
         if (elevation)
         {
-            if (!MapControlStatic.CollisionCheckElevation(startingPoint.position, hexagon.transform.position, elevation))
+            if (!MapControlStatic.CollisionCheckElevation(out Magnitude, startingPoint.position, hexagon.transform.position, elevation, this))
             {
                 ListHexgon.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
                 ListHexgon.AddRange(_listVertex);
 
                 ListHexgon.Add(hexagon);
-                ListOfNecessaryVertices.AddRange(BreakingTheDeadlock(ListHexgon));
+                ListOfNecessaryVertices = (BreakingTheDeadlock(ListHexgon));
             }
             else
             {
-                ListOfNecessaryVertices.Add(hexagon);
+                ListOfNecessaryVertices = new List<HexagonControl> { hexagon };
             }
         }
         else
         {
-            if (!MapControlStatic.CollisionCheck(startingPoint.position, hexagon.transform.position, elevation))
+            if (!MapControlStatic.CollisionCheck(out Magnitude, startingPoint.position, hexagon.transform.position, elevation, this))
             {
                 ListHexgon.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
                 ListHexgon.AddRange(_listVertex);
 
                 ListHexgon.Add(hexagon);
-                ListOfNecessaryVertices.AddRange(BreakingTheDeadlock(ListHexgon));
+                ListOfNecessaryVertices = (BreakingTheDeadlock(ListHexgon));
             }
             else
             {
-                ListOfNecessaryVertices.Add(hexagon);
+                ListOfNecessaryVertices = new List<HexagonControl> { hexagon };
             }
         }
-        return ListOfNecessaryVertices;
+        if (ListOfNecessaryVertices == null)
+        {
+            return null;
+        }
+        else
+            return ListOfNecessaryVertices;
     }
     private List<HexagonControl> BreakingTheDeadlock(List<HexagonControl> listHexagons)//выстравивает пути обхода
     {
-        List<Node> nodesList = _algorithmDijkstra.Dijkstra(CreatingEdge(listHexagons, true));
-        if (nodesList==null)
+        List<Node> nodesList = _algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(listHexagons, this));
+
+        if (nodesList == null)
         {
             return null;
         }
         List<HexagonControl> ListVertex = new List<HexagonControl>();
 
-        for (int i = 1; i < nodesList.Count; i++)
+        for (int i = 0; i < nodesList.Count; i++)
         {
-            ListVertex.Add(nodesList[i].NodeHexagon);
+            if (i != nodesList.Count - 1)
+            {
+                if (i != 0)
+                    ListVertex.Add(nodesList[i].NodeHexagon);
+
+                List<HexagonControl> Bending = nodesList[i].GetHexagonsBending(nodesList[i + 1]);
+                if (Bending != null)
+                {
+                    ListVertex.AddRange(Bending);
+                }
+            }
+            else
+                ListVertex.Add(nodesList[i].NodeHexagon);
         }
 
         return ListVertex;
     }
-    private Graph CreatingEdge(List<HexagonControl> listHexagons, bool IsConsiderEnemy)//выстраивает ребра в графе 
+    private void BypassCheck()
     {
-        var graph = new Graph(listHexagons);
-
-        for (int i = 0; i < graph.Length - 1; i++)
+        Vector2 MainPos = transform.position;
+        Vector2 HexPos = _heroMain.HexagonMain.transform.position;
+        if ((MainPos - HexPos).magnitude > 0.001f)
         {
-            bool IsElevation = false;
-
-            for (int j = i + 1; j < graph.Length; j++)
+            transform.position = Vector2.MoveTowards(transform.position, HexPos, _speed);
+        }
+        else
+        {
+            HexagonControl hexagonNext = MapControlStatic.FieldPosition(gameObject.layer, CurrentPos);
+            IMove move = hexagonNext.ObjAbove;
+            if ((move == null) || (move.IsGo()))
             {
-
-                Vector2 StartPosition = graph[i].NodeHexagon.transform.position;
-                Vector2 direction =  graph[j].NodeHexagon.transform.position;
-
-                bool NoRibs = false;
-                HexagonControl node = graph[j].NodeHexagon.Elevation != null? graph[j].NodeHexagon.Elevation: graph[j].NodeHexagon;
-
-                if (listHexagons[i].TypeHexagon <= 0 || (listHexagons[i].TypeHexagon == 3 && node.gameObject.layer != 10))
+                if (hexagonNext.IsFree)
                 {
-                    IsElevation = false;
-                    if (!MapControlStatic.CollisionCheck(StartPosition, direction, IsElevation))
-                    {
-                         NoRibs = true;
-                    }
+                    _isStop = false;
+                    ContinueMove(MoveCorotine);
                 }
-                else
-                {
-                    IsElevation = true;
-                    if (!MapControlStatic.CollisionCheckElevation(StartPosition, direction, IsElevation))
-                    {
-                        NoRibs = true;
-                    }
-                }
-
-                if (!NoRibs)
-                {
-                    float magnitude = (graph[i].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
-                    graph[i].Connect(graph[j], magnitude);
-                } 
+            }
+            else
+            {
+                //List<HexagonControl> controls = new List<HexagonControl>();
+                //controls.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
+                //controls.AddRange(move.GetSurroundingHexes());
+                //controls.Add(_targetHexagon);
+                //List<HexagonControl> Points = new List<HexagonControl>();
+                //Points = Bypass(controls);
+                //if (Points != null)
+                //{
+                //    //Debug.Log(Points.Count + " " + name);
+                //    _isStop = false;
+                //    BypassCorotine = MovementBypass(Points);
+                //    StartCoroutine(BypassCorotine);
+                //}
             }
         }
 
-        return graph;
     }
+
     public void StartWay(HexagonControl hexagonFinish)
     {
         //всегда вноси новый слой
         StopCoroutine(MoveCorotine);
         ListPoints.Clear();
         HexagonControl hexagon = hexagonFinish.Floor != null ? hexagonFinish.Floor : hexagonFinish;
-        ListPoints.AddRange(SearchForAWay(hexagon, transform, false));
-
-        if (ListPoints == null)
+        List<HexagonControl> ListHexgon = (SearchForAWay(hexagon, transform, false));
+        if (ListHexgon == null)
         {
             Debug.Log("No Way");
             return;
         }
+        else
+            ListPoints.AddRange(ListHexgon);
+
 
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
@@ -177,30 +209,59 @@ public class Navigation : MonoBehaviour
         ListPoints.Clear();
         HexagonControl hexagon = hexagonFinish.Floor != null ? hexagonFinish.Floor : hexagonFinish;
 
-        ListPoints.AddRange(SearchForAWay(hexagon, transform, true));
-
-        if (ListPoints==null)
+        List<HexagonControl> ListHexgon = (SearchForAWay(hexagon, transform, false));
+        if (ListHexgon == null)
         {
             Debug.Log("No Way");
             return;
         }
+        else
+            ListPoints.AddRange(ListHexgon);
 
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
     }
-    public void Initialization(HexagonControl[] hexagons,HeroControl hero)
+    public void Initialization(HexagonControl[] hexagons, HeroControl hero)
     {
         _heroMain = hero;
         _listVertex = new List<HexagonControl>();
         _listVertex.AddRange(hexagons);
 
     }
-    public void StopMove()
+    public void StopMove(IEnumerator Corotine)
     {
+        _heroMain.Animator.SetBool("Run", false);
+        _isStop = true;
+        _isMove = false;
         StopCoroutine(MoveCorotine);
     }
-    public void ContinueMove()
+    public void ContinueMove(IEnumerator Corotine)
     {
+        _heroMain.Animator.SetBool("Run", true);
+        _isMove = true;
+
         StartCoroutine(MoveCorotine);
     }
+
+    #region interface 
+    public bool IsGo()
+    {
+        return _isMove;
+    }
+
+    public EnemyControl GetEnemy()
+    {
+        return null;
+    }
+
+    public HeroControl GetHero()
+    {
+        return _heroMain;
+    }
+
+    public List<HexagonControl> GetSurroundingHexes()
+    {
+        return _heroMain.GetSurroundingHexes();
+    }
+    #endregion
 }

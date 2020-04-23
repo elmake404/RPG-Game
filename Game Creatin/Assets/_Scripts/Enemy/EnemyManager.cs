@@ -4,114 +4,116 @@ using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
 {
+    [SerializeField]
+    private GameObject _enemy;
+    [SerializeField]
+    private Transform[] _spawnPoint;
     private List<HeroControl> _listHero = new List<HeroControl>();
     private List<EnemyControl> _listEnemyControls = new List<EnemyControl>();
     private AlgorithmDijkstra algorithmDijkstra = new AlgorithmDijkstra();
 
+    [SerializeField]
+    private int _maxQuantityEnemy;
+    private int _namberPointSpawn = 0;
+
     void Start()
     {
-        StartCoroutine(GoalSelection());
+        //StartCoroutine(GoalSelection());
+        if (_maxQuantityEnemy > 0)
+        {
+            StartCoroutine(Production());
+        }
+        else
+        {
+            Debug.LogError("Incorrect number of units(_maxQuantityEnemy)");
+        }
     }
 
     void Update()
     {
-        
+
     }
 
-    private IEnumerator GoalSelection()
+    private void GoalSelection(EnemyControl enemy)
     {
-        yield return new WaitForSeconds(0.2f);
-        for (int i = 0; i < _listEnemyControls.Count; i++)
+        float disteinceMin = float.PositiveInfinity;
+        HeroControl hero = null;
+
+        for (int j = 0; j < _listHero.Count; j++)
         {
-            float disteinceMin = float.PositiveInfinity;
-            HeroControl hero = null;
-            for (int j = 0; j < _listHero.Count; j++)
+
+            if (_listHero[j].IsFreePlace())
             {
-                if (_listHero[j].IsFreePlace())
+                float disteinceThis = SearchForHero(MapControlStatic.FieldPosition(enemy.gameObject.layer, enemy.transform.position),
+                    MapControlStatic.FieldPosition(_listHero[j].gameObject.layer, _listHero[j].transform.position)); 
+
+                if (disteinceMin > disteinceThis)
                 {
-                    float disteinceThis = float.PositiveInfinity;
-
-                    SearchForHero(MapControlStatic.FieldPosition(_listEnemyControls[i].gameObject.layer, _listEnemyControls[i].transform.position),
-                        MapControlStatic.FieldPosition(_listHero[j].gameObject.layer, _listHero[j].transform.position), out disteinceThis);
-
-                    if (disteinceMin> disteinceThis)
-                    {
-                        disteinceMin = disteinceThis;
-                        hero = _listHero[j];
-                    }
-                    yield return new WaitForSeconds(0.000001f);
+                    //Debug.Log(enemy.name);
+                    //Debug.Log(disteinceMin);
+                    //Debug.Log(disteinceThis);
+                    disteinceMin = disteinceThis;
+                    hero = _listHero[j];
                 }
             }
-            if(hero!=null)
-            _listEnemyControls[i].StartWay(hero.FreePlace(_listEnemyControls[i]));
-            //Debug.Log(disteinceMin+" "+ _listEnemyControls[i].gameObject.name);
         }
+        if (hero != null)
+            enemy.StartWay(hero.FreePlace(enemy));
     }
-    private List<HexagonControl> SearchForHero(HexagonControl Start,HexagonControl Finish,out float Distance)//возвращает путь к герою стоимость 
+    private float SearchForHero(HexagonControl Start, HexagonControl Finish)//возвращает путь к герою стоимость 
     {
+        float Distance;
         Graph graphMain = new Graph(MapControlStatic.GraphStatic);
         graphMain.AddNodeFirst(Start);
         graphMain.AddNode(Finish);
 
-        List<HexagonControl> ListVertex = algorithmDijkstra.Dijkstra(CreatingEdge(graphMain),out Distance);
+       algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(graphMain), out Distance);
 
-        return ListVertex;
+        return Distance;
     }
-
-    private Graph CreatingEdge(Graph graph)
+    private IEnumerator Production()
     {
-        int NamberElement = -(graph.Length - 1);
+        int n =0;
 
-        for (int i = 0; i < 2; i++)
+        while (true)
         {
-            NamberElement += (graph.Length - 1);
-            bool IsElevation = false;
-
-            for (int j = 0; j < graph.Length; j++)
+            for (int i = 0; i < 3; i++)
             {
-                if (graph[NamberElement] == graph[j])
+                n++;
+
+                if (_maxQuantityEnemy != 0)
                 {
-                    continue;
-                }
+                    _maxQuantityEnemy--;
+                    EnemyControl Enemy = Instantiate(_enemy, _spawnPoint[_namberPointSpawn].position, Quaternion.identity).GetComponent<EnemyControl>();
+                    Enemy.gameObject.name = n.ToString() ;
+                    Enemy.First();
+                    GoalSelection(Enemy);
 
-                Vector2 StartPosition = graph[NamberElement].NodeHexagon.transform.position;
-                Vector2 direction = graph[j].NodeHexagon.transform.position;
-
-                bool NoRibs = false;
-
-                if (graph[NamberElement].NodeHexagon.TypeHexagon <= 0 || (graph[NamberElement].NodeHexagon.TypeHexagon == 3 && graph[j].NodeHexagon.gameObject.layer != 10))
-                {
-                    IsElevation = false;
-                    if (!MapControlStatic.CollisionCheck(StartPosition, direction, IsElevation))
+                    if (_namberPointSpawn != _spawnPoint.Length - 1)
                     {
-                        NoRibs = true;
+                        _namberPointSpawn++;
+                    }
+                    else
+                    {
+                        _namberPointSpawn = 0;
                     }
                 }
-                else
-                {
-                    IsElevation = true;
-                    if (!MapControlStatic.CollisionCheckElevation(StartPosition, direction, IsElevation))
-                    {
-                        NoRibs = true;
-                    }
-                }
+                //yield return new WaitForSeconds(0.00001f);
 
-
-                float distance = (graph[NamberElement].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
-
-                if (!NoRibs)
-                {
-                    float magnitude = (graph[NamberElement].NodeHexagon.transform.position - graph[j].NodeHexagon.transform.position).magnitude;
-                    graph[NamberElement].Connect(graph[j], magnitude);
-                }
+            }
+            if (_maxQuantityEnemy != 0)
+            {
+                yield return new WaitForSeconds(1f);
+            }
+            else
+            {
+                break;
             }
         }
-        return graph;
     }
 
-    public void InitializationList(HeroControl[] heroes, EnemyControl[] enemies )
+    public void InitializationList(HeroControl[] heroes)
     {
         _listHero.AddRange(heroes);
-        _listEnemyControls.AddRange(enemies);
     }
 }

@@ -5,11 +5,13 @@ using UnityEngine;
 public class HeroControl : MonoBehaviour
 {
     [SerializeField]
-    private Navigation NavigationHero;
+    private Navigation _navigationHero;
 
     public Animator Animator;
     [HideInInspector]
     public Dictionary<int, AnApproacData> AnApproac = new Dictionary<int, AnApproacData>();
+    [HideInInspector]
+    public HexagonControl HexagonMain;
 
     private void Awake()
     {
@@ -17,15 +19,24 @@ public class HeroControl : MonoBehaviour
         {
             AnApproac[i] = new AnApproacData();
         }
+        RecordApproac();
+
     }
     private void Start()
     {
-        RecordApproac();
+        HexagonMain = MapControlStatic.FieldPosition(gameObject.layer, transform.position);
+        HexagonMain.Contact(_navigationHero);
+
         //Invoke("RecordApproac", 0.5f);
     }
 
     private void Update()
     {
+        //if (HexagonMain != MapControlStatic.FieldPosition(gameObject.layer, transform.position))
+        //{
+        //    HexagonMain = MapControlStatic.FieldPosition(gameObject.layer, transform.position);
+        //}
+
     }
     private void RecordApproac()
     {
@@ -113,18 +124,35 @@ public class HeroControl : MonoBehaviour
 
             }
         }
+    }
+    public List<HexagonControl> GetSurroundingHexes()
+    {
+        RecordApproac();
+        List<HexagonControl> SurroundingHexes = new List<HexagonControl>();
+        for (int i = 0; i < AnApproac.Count; i++)
+        {
+            if (AnApproac[i].hexagon != null)
+                SurroundingHexes.Add(AnApproac[i].hexagon.GetHexagonMain());
+        }
+        return SurroundingHexes;
+    }
+    public void Collision(Vector2 NextPos, IEnumerator MoveCor)
+    {
+        HexagonControl hex = MapControlStatic.FieldPosition(gameObject.layer, NextPos);
 
-        //for (int i = 0; i < AnApproac.Count; i++)
-        //{
-        //    if (AnApproac[i].hexagon != null)
-        //    {
-        //        AnApproac[i].hexagon.Flag();
-        //    }
-        //    else
-        //    {
-        //        Debug.Log(i);
-        //    }
-        //}
+        if (HexagonMain != hex)
+        {
+            if (!hex.IsFree)
+            {
+                _navigationHero.StopMove(MoveCor);
+            }
+            else
+            {
+                HexagonMain.Gap();
+                HexagonMain = hex;
+                HexagonMain.Contact(_navigationHero);
+            }
+        }
     }
 
     public bool IsFreePlace()
@@ -155,14 +183,14 @@ public class HeroControl : MonoBehaviour
     }
     public void StartWay(HexagonControl hexagonFinish)
     {
-        NavigationHero.StartWay(hexagonFinish);
+        _navigationHero.StartWay(hexagonFinish);
     }
     public void StartWayElevation(HexagonControl hexagonFinish)
     {
-        NavigationHero.StartWayElevation(hexagonFinish);
+        _navigationHero.StartWayElevation(hexagonFinish);
     }
     public void InitializationVertexNavigation(HexagonControl[] _arrey)
     {
-        NavigationHero.Initialization(_arrey, this);
+        _navigationHero.Initialization(_arrey, this);
     }
 }

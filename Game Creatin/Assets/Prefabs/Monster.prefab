@@ -49,6 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _navigationBot: {fileID: 9078954178657922540}
+  HexagonMain: {fileID: 0}
 --- !u!114 &9078954178657922540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,7 +62,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6464d683af610d4497d753cbd579c25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 1
+  _enemyMain: {fileID: 2822881598915167576}
+  _speed: 0.4
 --- !u!50 &7993630380409840971
 Rigidbody2D:
   serializedVersion: 4
@@ -270,6 +272,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5026488433382046821, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c, type: 3}

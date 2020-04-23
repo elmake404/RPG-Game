@@ -8,11 +8,13 @@ public class Edge
     public readonly Node From;
     public readonly Node To;
     public readonly float Price;
-    public Edge(Node first, Node second, float price)
+    public readonly List<HexagonControl> BendingPoints;
+    public Edge(Node first, Node second, float price, List<HexagonControl> bendingPoints)
     {
         From = first;
         To = second;
         Price = price;
+        BendingPoints = bendingPoints;
     }
     public bool IsIncident(Node node)
     {
@@ -38,6 +40,18 @@ public class Node
         NodeNumber = number;
         NodeHexagon = main;
     }
+    public List<HexagonControl> GetHexagonsBending(Node nodeNext)
+    {
+        List<HexagonControl> getList = null;
+        for (int i = 0; i < incidentEdge.Count; i++)
+        {
+            if (incidentEdge[i].To == nodeNext)
+            {
+                getList = incidentEdge[i].BendingPoints;
+            } 
+        }
+        return getList;
+    }
 
     public List<Node> IncidentNodes()
     {
@@ -56,9 +70,9 @@ public class Node
     {
         return incidentEdge.Count;
     }
-    public void Connect(Node node,float magnitude)
+    public void Connect(Node node,float magnitude,List<HexagonControl> bendingPoints)
     {
-        Edge edge = new Edge(this,node,magnitude);
+        Edge edge = new Edge(this,node,magnitude,bendingPoints);
         incidentEdge.Add(edge);
         node.incidentEdge.Add(edge);
     }

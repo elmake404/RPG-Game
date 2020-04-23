@@ -11,14 +11,12 @@ public class MapControl : MonoBehaviour
     [SerializeField]
     private HeroControl[] _heroControls;
     [SerializeField]
-    private EnemyControl[] _enemyControls;
-    [SerializeField]
     private HexagonControl[] _arreyVertex,_elevation;
 
     void Awake()
     {
         MapControlStatic.MapPos = transform.position;
-        enemyManager.InitializationList(_heroControls,_enemyControls);
+        enemyManager.InitializationList(_heroControls);
         //MapControlStatic.Elevation = new HexagonControl[_elevation.Length];
         //for (int i = 0; i < _elevation.Length; i++)
         //{
@@ -89,7 +87,7 @@ public class MapControl : MonoBehaviour
                 if (!NoRibs)
                 {
                     float magnitude = (MapControlStatic.GraphStatic[i].NodeHexagon.transform.position - MapControlStatic.GraphStatic[j].NodeHexagon.transform.position).magnitude;
-                    MapControlStatic.GraphStatic[i].Connect(MapControlStatic.GraphStatic[j], magnitude);
+                    MapControlStatic.GraphStatic[i].Connect(MapControlStatic.GraphStatic[j], magnitude,null);
                 }
             }
         }

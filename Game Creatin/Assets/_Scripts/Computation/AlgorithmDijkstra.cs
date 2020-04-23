@@ -29,7 +29,7 @@ public class AlgorithmDijkstra
             }
             if (toOpen==null)
             {
-                Debug.Log("Disconnected graph");
+                //Debug.Log("Disconnected graph");
                 return null;
             }
             if (toOpen == graph[graph.Length - 1])
@@ -78,7 +78,7 @@ public class AlgorithmDijkstra
             }
             if (toOpen==null)
             {
-                Debug.Log("Disconnected graph");
+                //Debug.Log("Disconnected graph");
                 totalPrice = float.PositiveInfinity;
                 return null;
             }
@@ -103,14 +103,18 @@ public class AlgorithmDijkstra
         float Total = 0;
         while (end != null)
         {
-            if ((end != null))
-                Total += track[end].Price;
+            if (Total==0)
+            {
+                Total = track[end].Price;
+                //Debug.Log(track[end].Price);
+            }
 
             result.Add(end.NodeHexagon);
             end = track[end].Previous;
         }
         totalPrice = Total;
         result.Reverse();
+        //Debug.Log(result.Count);
         return result;
     }
 
