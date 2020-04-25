@@ -17,11 +17,6 @@ public class MapControl : MonoBehaviour
     {
         MapControlStatic.MapPos = transform.position;
         enemyManager.InitializationList(_heroControls);
-        //MapControlStatic.Elevation = new HexagonControl[_elevation.Length];
-        //for (int i = 0; i < _elevation.Length; i++)
-        //{
-        //    MapControlStatic.Elevation[i] = _elevation[i];
-        //}
         for (int i = 0; i < hexagons.Length; i++)
         {
             hexagons[i].name = i.ToString();

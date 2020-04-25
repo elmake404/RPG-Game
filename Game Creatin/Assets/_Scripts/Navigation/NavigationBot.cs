@@ -13,7 +13,7 @@ public class NavigationBot : MonoBehaviour, IMove
     private EnemyControl _enemyMain;
     private Vector2 CurrentPos;
 
-    private bool _isStop = false, _isMove;
+    private bool _isStop = false, _isMove, _isBypass;
 
     [SerializeField]
     private float _speed;
@@ -22,7 +22,7 @@ public class NavigationBot : MonoBehaviour, IMove
         MoveCorotine = Movement();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (_isStop)
         {
@@ -106,13 +106,24 @@ public class NavigationBot : MonoBehaviour, IMove
         }
         List<HexagonControl> ListVertex = new List<HexagonControl>();
 
-        for (int i = 1; i < nodesList.Count; i++)
+        for (int i = 0; i < nodesList.Count; i++)
         {
-            ListVertex.Add(nodesList[i].NodeHexagon);
+            if (i != nodesList.Count - 1)
+            {
+                if (i != 0)
+                    ListVertex.Add(nodesList[i].NodeHexagon);
+
+                List<HexagonControl> Bending = nodesList[i].GetHexagonsBending(nodesList[i + 1]);
+                if (Bending != null)
+                {
+                    ListVertex.AddRange(Bending);
+                }
+            }
+            else
+                ListVertex.Add(nodesList[i].NodeHexagon);
         }
 
         return ListVertex;
-
     }
     private List<HexagonControl> SearchForAWay(HexagonControl hexagon)//возврашет все вершины по которым надо пройти 
     {
@@ -156,20 +167,21 @@ public class NavigationBot : MonoBehaviour, IMove
                     ContinueMove(MoveCorotine);
                 }
             }
-            else
+            else if(_isBypass)
             {
                 List<HexagonControl> controls = new List<HexagonControl>();
                 controls.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
-                controls.AddRange(move.GetSurroundingHexes());
                 controls.Add(_targetHexagon);
-                List<HexagonControl> Points = new List<HexagonControl>();
-                Points = Bypass(controls);
+                List<HexagonControl> Points = Bypass(controls);
                 if (Points != null)
                 {
-                    //Debug.Log(Points.Count + " " + name);
                     _isStop = false;
                     BypassCorotine = MovementBypass(Points);
                     StartCoroutine(BypassCorotine);
+                }
+                else
+                {
+                    _isBypass = false;
                 }
             }
         }
@@ -177,6 +189,10 @@ public class NavigationBot : MonoBehaviour, IMove
     }
     public void StartWay(HexagonControl hexagonFinish)
     {
+        if (hexagonFinish==null)
+        {
+            Debug.Log(2222);
+        }
         if (MoveCorotine != null)
         {
             StopCoroutine(MoveCorotine);
@@ -190,6 +206,8 @@ public class NavigationBot : MonoBehaviour, IMove
             return;
         }
 
+        _isStop = false;
+
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
     }
@@ -199,6 +217,7 @@ public class NavigationBot : MonoBehaviour, IMove
 
         StopCoroutine(Corotine);
         _isStop = true;
+        _isBypass = true;
         //StartCoroutine(SatrMove());
     }
     public void ContinueMove(IEnumerator Corotine)

@@ -18,7 +18,6 @@ public class EnemyManager : MonoBehaviour
 
     void Start()
     {
-        //StartCoroutine(GoalSelection());
         if (_maxQuantityEnemy > 0)
         {
             StartCoroutine(Production());
@@ -36,40 +35,44 @@ public class EnemyManager : MonoBehaviour
 
     private void GoalSelection(EnemyControl enemy)
     {
-        float disteinceMin = float.PositiveInfinity;
-        HeroControl hero = null;
-
-        for (int j = 0; j < _listHero.Count; j++)
+        int namber = Random.Range(0, _listHero.Count);
+        HeroControl hero = _listHero[namber];
+        List<int> NextNamber = new List<int>();
+        NextNamber.Add(namber);
+        //Debug.Log(NextNamber.IndexOf(10));
+        while (hero.CountEnemy()==0)
         {
-
-            if (_listHero[j].IsFreePlace())
+            if (NextNamber.Count >= 3)
             {
-                float disteinceThis = SearchForHero(MapControlStatic.FieldPosition(enemy.gameObject.layer, enemy.transform.position),
-                    MapControlStatic.FieldPosition(_listHero[j].gameObject.layer, _listHero[j].transform.position)); 
-
-                if (disteinceMin > disteinceThis)
-                {
-                    //Debug.Log(enemy.name);
-                    //Debug.Log(disteinceMin);
-                    //Debug.Log(disteinceThis);
-                    disteinceMin = disteinceThis;
-                    hero = _listHero[j];
-                }
+                hero = null;
+                break;
             }
+
+            namber = Random.Range(0, _listHero.Count);
+
+            if (NextNamber.IndexOf(namber)!=-1)
+            {
+                continue;
+            }
+
+            hero = _listHero[namber];
+            NextNamber.Add(namber);
         }
-        if (hero != null)
+
+        if (hero==null)
+        {
+            Debug.LogError("No free hero");
+            return;
+        }
+        hero.AddNewEnemy();
+        if (hero.IsFreePlace())
+        {
             enemy.StartWay(hero.FreePlace(enemy));
-    }
-    private float SearchForHero(HexagonControl Start, HexagonControl Finish)//возвращает путь к герою стоимость 
-    {
-        float Distance;
-        Graph graphMain = new Graph(MapControlStatic.GraphStatic);
-        graphMain.AddNodeFirst(Start);
-        graphMain.AddNode(Finish);
-
-       algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(graphMain), out Distance);
-
-        return Distance;
+        }
+        else
+        {
+            enemy.StartWay(hero.RandomPlace(enemy));
+        }
     }
     private IEnumerator Production()
     {
@@ -98,8 +101,8 @@ public class EnemyManager : MonoBehaviour
                         _namberPointSpawn = 0;
                     }
                 }
-                //yield return new WaitForSeconds(0.00001f);
 
+                yield return new WaitForSeconds(0.00001f);
             }
             if (_maxQuantityEnemy != 0)
             {

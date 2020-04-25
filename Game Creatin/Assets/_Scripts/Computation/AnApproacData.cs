@@ -6,7 +6,7 @@ public class AnApproacData
 {
     public HexagonControl hexagon;
     public bool busy;
-    public EnemyControl enemy;
+    public List<EnemyControl> enemy = new List<EnemyControl>();
 
     public void Ban()
     {

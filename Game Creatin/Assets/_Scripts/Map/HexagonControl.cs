@@ -93,7 +93,7 @@ public class HexagonControl : MonoBehaviour
     }
     public HexagonControl GetHexagonMain(bool elevation)
     {
-        if (Elevation!=null)
+        if (Elevation != null)
         {
             if (!Elevation.FreedomTestType(elevation))
             {
@@ -118,7 +118,7 @@ public class HexagonControl : MonoBehaviour
     }
     public HexagonControl GetHexagonMain()
     {
-        if (Elevation!=null )
+        if (Elevation != null)
         {
             return Elevation;
         }
@@ -139,7 +139,7 @@ public class HexagonControl : MonoBehaviour
     }
     public bool IsFreeTest(EnemyControl enemy)
     {
-        if (enemy == ObjAbove.GetEnemy()|| IsFree)
+        if (enemy == ObjAbove.GetEnemy() || IsFree)
         {
             return true;
         }
@@ -150,7 +150,7 @@ public class HexagonControl : MonoBehaviour
     }
     public bool IsFreeTestHex()
     {
-        if ((IsFree)||(!IsFree&&!ObjAbove.IsGo()))
+        if ((IsFree) || (!IsFree && !ObjAbove.IsGo()))
         {
             return true;
         }
@@ -165,12 +165,8 @@ public class HexagonControl : MonoBehaviour
 
         ObjAbove = move;
     }
-    public void Gap ()
+    public void Gap()
     {
-        //if (Row==6&&Column==13)
-        //{
-        //    Debug.Log(1);
-        //}
         IsFree = true;
 
         ObjAbove = null;

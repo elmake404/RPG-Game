@@ -7,8 +7,9 @@ public class Edge
 {
     public readonly Node From;
     public readonly Node To;
-    public readonly float Price;
     public readonly List<HexagonControl> BendingPoints;
+    public float Price { get; private set; }
+
     public Edge(Node first, Node second, float price, List<HexagonControl> bendingPoints)
     {
         From = first;
@@ -27,6 +28,10 @@ public class Edge
         if (From == node) 
             return To;
         return From;
+    }
+    public void Revalue (float NewPrice)
+    {
+        Price = NewPrice;
     }
 }
 public class Node
@@ -76,6 +81,10 @@ public class Node
         incidentEdge.Add(edge);
         node.incidentEdge.Add(edge);
     }
+    public void RevalueEdge(int index,float priace)
+    {
+        incidentEdge[index].Revalue(priace);
+    }
 }
 
 public class Graph
@@ -124,8 +133,6 @@ public class Graph
     }
     public List<Node> GetListNodes()
     {
-        //List<Node> nodesList = new List<Node>();
-        //nodesList.AddRange(nodes);
         return nodes;
     }
     public IEnumerable<Node> Nodes

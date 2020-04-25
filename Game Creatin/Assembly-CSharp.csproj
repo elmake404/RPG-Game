@@ -109,6 +109,7 @@
     <Compile Include="Assets\HeroEditor\Common\ExampleScripts\SaveLoadExample.cs" />
     <Compile Include="Assets\HeroEditor\Common\ExampleScripts\SortingOrderExample.cs" />
     <Compile Include="Assets\HeroEditor\Common\ExampleScripts\TestRoom.cs" />
+    <Compile Include="Assets\hgkjhjk.cs" />
     <None Include="Assets\HeroEditor\Common\Shaders\GrayPaint.shader" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/Admin/Documents/RPG-Game/Game Creatin/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
