@@ -15,14 +15,13 @@ public class HexagonControl : MonoBehaviour
 
     [Range(0, 3)]
     public int TypeHexagon;
-    [SerializeField]
-    public bool IsFree;//СТОИТ ЛИ КТОТО НА БЛОКЕ
+    //[SerializeField]
+    public bool IsFree = true;
 
     //[SerializeField]
     //float mag,  mag2;
     private void Awake()
     {
-        IsFree = true;
         if (Elevation != null)
         {
             Elevation.Floor = this;

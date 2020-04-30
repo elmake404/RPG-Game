@@ -13,13 +13,20 @@ public class hgkjhjk : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Vector2 y = MapControlStatic.mapNav[1, 17].transform.position;
-            transform.position = Vector2.MoveTowards(transform.position, y, 1f);
+            //Vector2 y = MapControlStatic.mapNav[5, 10].transform.position;
+            //Vector2 y = MapControlStatic.mapNav[5, 11].transform.position;
+            Vector2 y = MapControlStatic.mapNav[4, 14].transform.position;
+            transform.position = Vector2.MoveTowards(transform.position, y,  0.1f);
             HexagonControl[] controls = null;
-            controls = MapControlStatic.GetPositionOnTheMap(y.x - transform.position.x, transform.position);
+            controls = MapControlStatic.GetPositionOnTheMap(y, transform.position);
             for (int i = 0; i < controls.Length; i++)
             {
+                if (controls[i]==null)
+                {
+                    Debug.Log(controls.Length);
+                }
                 controls[i].Flag();
+               
             }
         }
     }

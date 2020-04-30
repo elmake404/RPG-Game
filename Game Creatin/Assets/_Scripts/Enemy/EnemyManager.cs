@@ -64,15 +64,18 @@ public class EnemyManager : MonoBehaviour
             Debug.LogError("No free hero");
             return;
         }
-        hero.AddNewEnemy();
-        if (hero.IsFreePlace())
-        {
-            enemy.StartWay(hero.FreePlace(enemy));
-        }
-        else
-        {
-            enemy.StartWay(hero.RandomPlace(enemy));
-        }
+        hero.AddNewEnemy(enemy);
+        enemy.HeroTarget = hero;
+        enemy.StartWay(hero.HexagonMain);
+        //enemy.InitializationHeroTarget(hero);
+        //if (hero.IsFreePlace())
+        //{
+        //    enemy.StartWay(hero.FreePlace(enemy));
+        //}
+        //else
+        //{
+        //    enemy.StartWay(hero.RandomPlace(enemy));
+        //}
     }
     private IEnumerator Production()
     {

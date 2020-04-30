@@ -30,7 +30,7 @@ public class MapControl : MonoBehaviour
         }
         for (int i = 0; i < _heroControls.Length; i++)
         {
-            _heroControls[i].InitializationVertexNavigation(_arreyVertex);
+            _heroControls[i].Initialization(_arreyVertex);
         }
         GraphRecord();
 

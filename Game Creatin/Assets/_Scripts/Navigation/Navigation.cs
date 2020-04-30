@@ -75,6 +75,10 @@ public class Navigation : MonoBehaviour, IMove
     }
     private IEnumerator MovementBypass(List<HexagonControl> hexagonControls)//коротина обхода
     {
+        //for (int i = 0; i < hexagonControls.Count; i++)
+        //{
+        //    hexagonControls[i].Flag();
+        //}
         _isMove = true;
         List<HexagonControl> PointList = new List<HexagonControl>();
         PointList.AddRange(hexagonControls);
@@ -111,11 +115,12 @@ public class Navigation : MonoBehaviour, IMove
     {
         List<HexagonControl> ListOfNecessaryVertices;
         float Magnitude;
+
         if (elevation)
         {
             if (!MapControlStatic.CollisionCheckElevation(out Magnitude, startingPoint.position, hexagon.transform.position, elevation, this))
             {
-                ListOfNecessaryVertices = (BreakingTheDeadlock(MapControlStatic.FieldPosition(gameObject.layer, transform.position), hexagon));
+                ListOfNecessaryVertices = (BreakingTheDeadlock(GetArrayHex(), hexagon));
             }
             else
             {
@@ -126,13 +131,14 @@ public class Navigation : MonoBehaviour, IMove
         {
             if (!MapControlStatic.CollisionCheck(out Magnitude, startingPoint.position, hexagon.transform.position, elevation, this))
             {
-                ListOfNecessaryVertices = (BreakingTheDeadlock(MapControlStatic.FieldPosition(gameObject.layer, transform.position), hexagon));
+                ListOfNecessaryVertices = (BreakingTheDeadlock(GetArrayHex(), hexagon));
             }
             else
             {
                 ListOfNecessaryVertices = new List<HexagonControl> { hexagon };
             }
         }
+
         if (ListOfNecessaryVertices == null)
         {
             return null;
@@ -226,7 +232,7 @@ public class Navigation : MonoBehaviour, IMove
             {
                 List<HexagonControl> controls = new List<HexagonControl>
                 {
-                    MapControlStatic.FieldPosition(gameObject.layer, transform.position),
+                    GetArrayHex(),
                     _targetHexagon
                 };
 
@@ -244,6 +250,11 @@ public class Navigation : MonoBehaviour, IMove
             }
         }
 
+    }
+    private HexagonControl GetArrayHex()
+    {
+        HexagonControl hexagon = MapControlStatic.FieldPosition(gameObject.layer, transform.position);
+        return hexagon.Floor != null ? hexagon.Floor : hexagon;
     }
     public void StartWay(HexagonControl hexagonFinish)
     {

@@ -13,6 +13,12 @@ public static class MapControlStatic
 
     private static List<HexagonControl> GetBending(List<HexagonControl> hexagonsBending, IMove iMove, out float Mag)// запускает алгоритм дейкстра и возвращает точки через которые надо пройти 
     {
+        //if (MapControlStatic.mapNav[2, 16] == hexagonsBending[hexagonsBending.Count - 1])
+        //    for (int i = 0; i < hexagonsBending.Count; i++)
+        //    {
+        //        hexagonsBending[i].Flag();
+        //    }
+        //hexagonsBending[hexagonsBending.Count - 1].Flag();
         List<HexagonControl> bendingVertex = _algorithmDijkstra.Dijkstra(CreatingEdgeBending(hexagonsBending, iMove), out Mag);
 
         if (bendingVertex != null)
@@ -30,7 +36,7 @@ public static class MapControlStatic
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
             for (int i = 0; i < controls.Length; i++)
             {
                 Vector2 PosHex = controls[i].transform.position;
@@ -54,7 +60,7 @@ public static class MapControlStatic
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
             for (int i = 0; i < controls.Length; i++)
             {
                 Vector2 PosHex = controls[i].transform.position;
@@ -63,6 +69,7 @@ public static class MapControlStatic
                     if (!controls[i].FreedomTestType(elevation))
                     {
                         disteins = float.PositiveInfinity;
+
                         return false;
                     }
 
@@ -71,6 +78,7 @@ public static class MapControlStatic
                         if ((!controls[i].IsFree) && (!controls[i].ObjAbove.IsGo() && controls[i].ObjAbove.GetHero() != iMove.GetHero()))
                         {
                             disteins = float.PositiveInfinity;
+
                             return false;
                         }
                     }
@@ -79,6 +87,7 @@ public static class MapControlStatic
                         if ((!controls[i].IsFree) && (!controls[i].ObjAbove.IsGo() && controls[i].ObjAbove.GetEnemy() != iMove.GetEnemy()))
                         {
                             disteins = float.PositiveInfinity;
+
                             return false;
                         }
                     }
@@ -99,7 +108,8 @@ public static class MapControlStatic
         List<IMove> ListOblMove = new List<IMove>();
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
+
             for (int i = 0; i < controls.Length; i++)
             {
                 Vector2 PosHex = controls[i].transform.position;
@@ -160,7 +170,7 @@ public static class MapControlStatic
         List<IMove> ListOblMove = new List<IMove>();
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
             for (int i = 0; i < controls.Length; i++)
             {
                 Vector2 PosHex = controls[i].transform.position;
@@ -222,7 +232,7 @@ public static class MapControlStatic
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
             for (int i = 0; i < controls.Length; i++)
             {
                 Vector2 PosHex = controls[i].transform.position;
@@ -259,7 +269,7 @@ public static class MapControlStatic
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
 
             for (int i = 0; i < controls.Length; i++)
             {
@@ -333,7 +343,7 @@ public static class MapControlStatic
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
 
             for (int i = 0; i < controls.Length; i++)
             {
@@ -389,7 +399,7 @@ public static class MapControlStatic
                     }
                 }
             }
-            currentVector = Vector2.MoveTowards(currentVector, TargetPos,1f);
+            currentVector = Vector2.MoveTowards(currentVector, TargetPos, 1f);
         }
         Vector2 StartPos = from.NodeHexagon.transform.position;
         disteins = (StartPos - TargetPos).magnitude;
@@ -419,7 +429,7 @@ public static class MapControlStatic
             from.Connect(to, disteins, null);
         }
     }
-    public static float CollisionCheckElevationRepeated( Node from, Node to, bool elevation, IMove iMove)//возыращет disteins если на пути нет припятсвий или float.PositiveInfinity , обход врагов и героев (возвышанность)
+    public static float CollisionCheckElevationRepeated(Node from, Node to, bool elevation, IMove iMove)//возыращет disteins если на пути нет припятсвий или float.PositiveInfinity , обход врагов и героев (возвышанность)
     {
         float disteins;
         Vector2 TargetPos = to.NodeHexagon.transform.position;
@@ -429,7 +439,7 @@ public static class MapControlStatic
 
         while ((TargetPos - currentVector).magnitude > 0.1f)
         {
-            controls = GetPositionOnTheMap(TargetPos.x - currentVector.x, currentVector);
+            controls = GetPositionOnTheMap(TargetPos, currentVector);
 
             for (int i = 0; i < controls.Length; i++)
             {
@@ -518,28 +528,32 @@ public static class MapControlStatic
             return disteins;
         }
     }
-    public static HexagonControl[] GetPositionOnTheMap(float XTarget, Vector2 Position) // возвращает гексагон через позицию (может определить два блока)
+    public static HexagonControl[] GetPositionOnTheMap(Vector2 Target, Vector2 Position) // возвращает гексагон через позицию (может определить два блока)
     {
-        float Y = (Position.y - MapPos.y) / 3f;
-        int YMax = Mathf.Abs(Mathf.RoundToInt(Y));
+        Vector2 Normalized = (Target - Position).normalized;
+        float XTarget = (float)System.Math.Round(Normalized.x, 1);
+        float YTarget = (float)System.Math.Round(Normalized.y, 1);
+        float Y = (Position.y - MapPos.y) / -3f;
+        float YOld = (Position.y - MapPos.y) / -3f;
+        int YMax = Mathf.RoundToInt(Y);
         float Difference = 0;
         float f = ((Position.x - (MapPos.x - 3.46f)) / 1.73f);
         float R = Mathf.Floor(f) * 1.73f - (Position.x - (MapPos.x - 3.46f));
         int G = R % 2 == 0 ? -1 : 0;
 
-        if (Mathf.Abs(YMax - Mathf.Abs(Y)) < 1 - (G + (0.3f + ((0.3 / 1.73) * Mathf.Abs(R)))))
+        if (Mathf.Abs(YMax - Y) < 1 - (G + (0.33f + ((0.33 / 1.73) * Mathf.Abs(R)))))
         {
-            Y = Mathf.Round(Mathf.Abs(Y));
+            Y = Mathf.Round(Y);
         }
         else
         {
             if (YMax - Mathf.Abs(Y) > 0)
             {
-                Y = Mathf.Floor(Mathf.Abs(Y));
+                Y = Mathf.Floor(Y);
             }
             else
             {
-                Y = Mathf.Ceil(Mathf.Abs(Y));
+                Y = Mathf.Ceil(Y);
             }
         }
 
@@ -547,33 +561,219 @@ public static class MapControlStatic
         {
             Difference = 0.5f;
         }
+
         float factor = (mapNav[0, 1].transform.position.x - mapNav[0, 0].transform.position.x);
         float X = ((Position.x - MapPos.x) / factor) + Difference;
 
         X = X > 0 ? X : 0;
-        int XInt = Mathf.RoundToInt(X);
-        if ((float)System.Math.Round((XInt - X), 2) == 0.5 && XTarget == 0)
+        int XInt;
+        if (X == 0.5)
         {
-            HexagonControl[] hexagons = new HexagonControl[2];
-            int namber = 0;
+            XInt = 1;
+        }
+        else
+        {
+            XInt = Mathf.RoundToInt(X);
+        }
+
+        List<HexagonControl> hexagonsList = new List<HexagonControl>();
+        if (Mathf.Abs((float)System.Math.Round((XInt - X), 2)) == 0.5 && (float)System.Math.Round((YMax - YOld), 1) == -0.3f)
+        {
+            if (Y < 8)
+            {
+                int NewY = (int)Y + 1;
+                int deviationEven;
+                int deviationOdd;
+                if (YTarget > 0)
+                {
+                    deviationEven = XTarget > 0 ? 0 : 1;
+                    deviationOdd = XTarget > 0 ? -1 : 0;
+                }
+                else
+                {
+                    deviationEven = XTarget > 0 ? 1 : 0;
+                    deviationOdd = XTarget > 0 ? 0 : -1;
+                }
+
+                int DifferenceX = NewY % 2 == 0 ? deviationOdd : deviationEven;
+                if ((XInt + DifferenceX) <= 19 && (XInt + DifferenceX) >= 0)
+                    hexagonsList.Add(mapNav[NewY, XInt + DifferenceX]);
+                //Debug.Log(YTarget);
+            }
             if (XInt <= 19)
             {
-                hexagons[namber] = mapNav[(int)Y, XInt];
-                namber++;
+                hexagonsList.Add(mapNav[(int)Y, XInt]);
+            }
+
+            if (XInt > 0)
+            {
+                int deviation = XTarget > 0 ? -1 : 1;
+
+                if ((XInt + deviation) <= 19 && (XInt + deviation) >= 0)
+                    hexagonsList.Add(mapNav[(int)Y, XInt + deviation]);
+            }
+
+            HexagonControl[] hexagons = new HexagonControl[hexagonsList.Count];
+            for (int i = 0; i < hexagonsList.Count; i++)
+            {
+                hexagons[i] = hexagonsList[i];
+            }
+
+            return hexagons;
+        }
+        else if (Mathf.Abs((float)System.Math.Round((XInt - X), 2)) == 0.5 && (float)System.Math.Round((YMax - YOld), 1) == 0.3f)
+        {
+            if (Y > 0)
+            {
+                int NewY = (int)Y - 1;
+                int deviationEven;
+                int deviationOdd;
+                if (YTarget > 0)
+                {
+                    deviationEven = XTarget > 0 ? -1 : 0;
+                    deviationOdd = XTarget > 0 ? 0 : 1;
+                }
+                else
+                {
+                    deviationEven = XTarget > 0 ? 0 : -1;
+                    deviationOdd = XTarget > 0 ? 1 : 0;
+                }
+
+                int DifferenceX = NewY % 2 == 0 ? deviationEven : deviationOdd;
+                if ((XInt + DifferenceX) <= 19 && (XInt + DifferenceX) >= 0)
+                {
+                    hexagonsList.Add(mapNav[NewY, XInt + DifferenceX]);
+                }
+            }
+
+            if (XInt <= 19)
+            {
+                hexagonsList.Add(mapNav[(int)Y, XInt]);
             }
             if (XInt > 0)
             {
-                if (namber == 0)
-                    hexagons = new HexagonControl[1];
-
-                hexagons[namber] = mapNav[(int)Y, XInt - 1];
+                int deviation;
+                if (YTarget > 0)
+                {
+                    deviation = XTarget > 0 ? -1 : 1;
+                }
+                else
+                {
+                    deviation = XTarget > 0 ? 1 : -1;
+                }
+                if ((XInt + deviation) <= 19 && (XInt + deviation) >= 0)
+                    hexagonsList.Add(mapNav[(int)Y, XInt + deviation]);
             }
+
+            HexagonControl[] hexagons = new HexagonControl[hexagonsList.Count];
+            for (int i = 0; i < hexagonsList.Count; i++)
+            {
+                hexagons[i] = hexagonsList[i];
+            }
+
             return hexagons;
+        }
+        else if (Mathf.Abs((float)System.Math.Round((XInt - X), 2)) == 0.5 && XTarget == 0)
+        {
+            if (XInt <= 19)
+            {
+                hexagonsList.Add(mapNav[(int)Y, XInt]);
+            }
+            if (XInt > 0)
+            {
+                hexagonsList.Add(mapNav[(int)Y, XInt - 1]);
+            }
+            HexagonControl[] hexagons = new HexagonControl[hexagonsList.Count];
+            for (int i = 0; i < hexagonsList.Count; i++)
+            {
+                hexagons[i] = hexagonsList[i];
+            }
+
+            return hexagons;
+        }
+        else if (Mathf.Abs((float)System.Math.Round((XInt - X), 3)) < 0.5f && (Mathf.Abs((float)System.Math.Round((YMax - YOld), 3)) < 0.51 && Mathf.Abs((float)System.Math.Round((YMax - YOld), 3)) > 0.33) && ((Mathf.Abs(XTarget) == 0.9f) && (Mathf.Abs(YTarget) == 0.5f)))
+        {
+            //Debug.Log((Target - Position).normalized);
+
+            if (YMax - YOld > 0)
+            {
+                if (Y > 0)
+                {
+                    int deviationEven;
+                    int deviationOdd;
+
+                    if (YTarget > 0)
+                    {
+
+                        deviationEven = XTarget > 0 ? 1 : 1;
+                        deviationOdd = XTarget > 0 ? -1 : 0;
+
+                    }
+                    else
+                    {
+                        deviationEven = XTarget > 0 ? 1 : 0;
+                        deviationOdd = XTarget > 0 ? 0 : -1;
+                    }
+
+                    int NewY = (int)Y - 1;
+                    int DifferenceX = NewY % 2 == 0 ? deviationOdd : deviationEven;
+                    if ((XInt + DifferenceX) <= 19 && (XInt + DifferenceX) >= 0)
+                    {
+                        hexagonsList.Add(mapNav[NewY, XInt + DifferenceX]);
+                    }
+                }
+
+                hexagonsList.Add(mapNav[(int)Y, XInt]);
+                HexagonControl[] hexagons = new HexagonControl[hexagonsList.Count];
+                for (int i = 0; i < hexagonsList.Count; i++)
+                {
+                    hexagons[i] = hexagonsList[i];
+                }
+
+                return hexagons;
+            }
+            else
+            {
+                if (Y < 8)
+                {
+                    int deviationEven;
+                    int deviationOdd;
+
+                    if (YTarget > 0)
+                    {
+                        deviationEven = XTarget > 0 ? 0 : -1;
+                        deviationOdd = XTarget > 0 ? 1 : 0;
+                    }
+                    else
+                    {
+                        deviationEven = XTarget > 0 ? -1 : -1;
+                        deviationOdd = XTarget > 0 ? 0 : 0;
+                    }
+                    int NewY = (int)Y + 1;
+                    int DifferenceX = NewY % 2 == 0 ? deviationEven : deviationOdd;
+                    if ((XInt + DifferenceX) <= 19 && (XInt + DifferenceX) >= 0)
+                    {
+                        hexagonsList.Add(mapNav[NewY, XInt + DifferenceX]);
+                    }
+                    //Debug.Log(DifferenceX);
+                }
+
+                hexagonsList.Add(mapNav[(int)Y, XInt]);
+
+                HexagonControl[] hexagons = new HexagonControl[hexagonsList.Count];
+                for (int i = 0; i < hexagonsList.Count; i++)
+                {
+                    hexagons[i] = hexagonsList[i];
+                }
+
+                return hexagons;
+            }
         }
         else
         {
             HexagonControl[] hexagons = new HexagonControl[1];
             hexagons[0] = mapNav[(int)Y, XInt];
+
             return hexagons;
         }
     }
@@ -585,6 +785,16 @@ public static class MapControlStatic
         float f = ((Position.x - (MapPos.x - 3.46f)) / 1.73f);
         float R = Mathf.Floor(f) * 1.73f - (Position.x - (MapPos.x - 3.46f));
         int G = R % 2 == 0 ? -1 : 0;
+
+        //if ((float)System.Math.Round((YMax - Mathf.Abs(Y)), 1) == -0.3f)
+        //{
+        //    Y -= 0.5f;
+        //}
+        //else if ((float)System.Math.Round((YMax - Mathf.Abs(Y)), 1) == 0.3f)
+        //{
+        //    Debug.Log(System.Math.Round((YMax - Mathf.Abs(Y)), 1));
+        //    Y += 0.5f;
+        //}
 
         if (Mathf.Abs(YMax - Mathf.Abs(Y)) < 1 - (G + (0.3f + ((0.3 / 1.73) * Mathf.Abs(R)))))
         {
@@ -617,9 +827,9 @@ public static class MapControlStatic
     public static HexagonControl FieldPosition(int layer, Vector2 position)//гексагон к которому принадлежит герой
     {
         Vector2 difference = layer == 8 ? Vector2.zero : new Vector2(X, Y);
-
-        return GetPositionOnTheMap(position - difference).Elevation != null ?
-           GetPositionOnTheMap(position - difference).Elevation : GetPositionOnTheMap(position - difference);//нужный 6-ти угольник  
+        HexagonControl hexagon = GetPositionOnTheMap(position - difference);
+        return hexagon.Elevation != null ?
+           hexagon.Elevation : hexagon;//нужный 6-ти угольник  
     }
     public static Graph CreatingEdge(List<HexagonControl> listHexagons, IMove move)//выстраивает ребра в графе 
     {
@@ -795,3 +1005,24 @@ public static class MapControlStatic
         return graph;
     }
 }
+//List<HexagonControl> hexagonControls = new List<HexagonControl>();
+//hexagonControls.Add(GetPositionOnTheMap(Position));
+//        if (hexagonControls.IndexOf(GetPositionOnTheMap(Position + new Vector2(0, 0.5f)))==-1)
+//            hexagonControls.Add(GetPositionOnTheMap(Position + new Vector2(0, 0.5f)));
+
+//        if (hexagonControls.IndexOf(GetPositionOnTheMap(Position + new Vector2(0, -0.5f))) == -1)
+//            hexagonControls.Add(GetPositionOnTheMap(Position + new Vector2(0, -0.5f)));
+
+//        if (hexagonControls.IndexOf(GetPositionOnTheMap(Position + new Vector2(0.5f, 0))) == -1)
+//            hexagonControls.Add(GetPositionOnTheMap(Position + new Vector2(0.5f, 0)));
+
+//        if (hexagonControls.IndexOf(GetPositionOnTheMap(Position + new Vector2(-0.5f, 0))) == -1)
+//            hexagonControls.Add(GetPositionOnTheMap(Position + new Vector2(-0.5f, 0)));
+
+//        HexagonControl[] hexagons = new HexagonControl[hexagonControls.Count];
+//        for (int i = 0; i<hexagonControls.Count; i++)
+//        {
+//            hexagons[i] = hexagonControls[i];
+//        }
+
+//        return hexagons;

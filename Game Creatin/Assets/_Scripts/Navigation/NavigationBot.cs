@@ -7,19 +7,27 @@ public class NavigationBot : MonoBehaviour, IMove
     private IEnumerator MoveCorotine;
     private IEnumerator BypassCorotine;
     private List<HexagonControl> ListPoints = new List<HexagonControl>();//точки через который надо пройти 
-    private HexagonControl _targetHexagon;
+    private HexagonControl _targetHexagon, g;
     private AlgorithmDijkstra _algorithmDijkstra = new AlgorithmDijkstra();
     [SerializeField]
     private EnemyControl _enemyMain;
     private Vector2 CurrentPos;
 
-    private bool _isStop = false, _isMove, _isBypass;
+    private bool _isStop = false, _isMove, _isBypass, _isToTheHero = false;
 
     [SerializeField]
     private float _speed;
+    private int _namberAnApproac;
     private void Awake()
     {
         MoveCorotine = Movement();
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && _isToTheHero)
+        {
+            g.Flag();
+        }
     }
 
     void FixedUpdate()
@@ -31,6 +39,7 @@ public class NavigationBot : MonoBehaviour, IMove
     }
     private IEnumerator Movement()//коротина движения
     {
+        g = ListPoints[ListPoints.Count - 1];
         _isMove = true;
         List<HexagonControl> PointList = new List<HexagonControl>();
         PointList.AddRange(ListPoints);
@@ -61,6 +70,11 @@ public class NavigationBot : MonoBehaviour, IMove
                 }
             }
             yield return new WaitForSeconds(0.02f);
+        }
+        if (_isToTheHero)
+        {
+            _isToTheHero = false;
+            _enemyMain.HeroTarget.AnApproac[_namberAnApproac].busy = true;
         }
         _isMove = false;
     }
@@ -97,9 +111,61 @@ public class NavigationBot : MonoBehaviour, IMove
         }
         ContinueMove(MoveCorotine);
     }
+    private void ResetPath()
+    {
+        StopCoroutine(MoveCorotine);
+        if (BypassCorotine != null)
+        {
+            StopCoroutine(BypassCorotine);
+        }
+    }
+    private HexagonControl GetNearestPlace(HeroControl hero)
+    {
+        Dictionary<int, AnApproacData> place = hero.AnApproac;
+        float Magnitude = float.PositiveInfinity;
+        int namber = int.MaxValue;
+        for (int i = 0; i < place.Count; i++)
+        {
+            if (place[i].hexagon != null)
+            {
+                if (!place[i].busy)
+                {
+                    if ((place[i].hexagon.transform.position - transform.position).magnitude < Magnitude)
+                    {
+                        Magnitude = (place[i].hexagon.transform.position - transform.position).magnitude;
+                        namber = i;
+                    }
+                }
+                else
+                {
+                    IMove moveThis = this;
+                    if (place[i].hexagon.ObjAbove == moveThis)
+                    {
+                        if ((place[i].hexagon.transform.position - transform.position).magnitude < Magnitude)
+                        {
+                            Magnitude = (place[i].hexagon.transform.position - transform.position).magnitude;
+                            namber = i;
+                        }
+                    }
+                }
+            }
+        }
+        _isToTheHero = true;
+
+        if (namber < int.MaxValue)
+        {
+            _namberAnApproac = namber;
+            return place[namber].hexagon;
+        }
+        else
+        {
+            return hero.RandomPlace(out _namberAnApproac);
+        }
+    }
+
     private List<HexagonControl> Bypass(List<HexagonControl> hexagons)//метод обхода
     {
-        List<Node> nodesList = _algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(hexagons,this));
+        List<Node> nodesList = _algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(hexagons, this));
         if (nodesList == null)
         {
             return null;
@@ -167,7 +233,7 @@ public class NavigationBot : MonoBehaviour, IMove
                     ContinueMove(MoveCorotine);
                 }
             }
-            else if(_isBypass)
+            else if (_isBypass)
             {
                 List<HexagonControl> controls = new List<HexagonControl>();
                 controls.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
@@ -181,7 +247,21 @@ public class NavigationBot : MonoBehaviour, IMove
                 }
                 else
                 {
-                    _isBypass = false;
+                    List<HexagonControl> controls2 = new List<HexagonControl>();
+                    controls2.Add(MapControlStatic.FieldPosition(gameObject.layer, transform.position));
+                    controls2.Add(GetNearestPlace(_enemyMain.HeroTarget));
+                    List<HexagonControl> Points2 = Bypass(controls2);
+                    if (Points2 != null)
+                    {
+                        _enemyMain.HeroConnect();
+                        _isStop = false;
+                        BypassCorotine = MovementBypass(Points2);
+                        StartCoroutine(BypassCorotine);
+                    }
+                    else
+                    {
+                        _isBypass = false;
+                    }
                 }
             }
         }
@@ -189,14 +269,17 @@ public class NavigationBot : MonoBehaviour, IMove
     }
     public void StartWay(HexagonControl hexagonFinish)
     {
-        if (hexagonFinish==null)
+        if (hexagonFinish == null)
         {
-            Debug.Log(2222);
+            Debug.LogError("lack of end point");
+            return;
         }
+
         if (MoveCorotine != null)
         {
             StopCoroutine(MoveCorotine);
         }
+
         ListPoints.Clear();
         ListPoints.AddRange(SearchForAWay(hexagonFinish));
 
@@ -210,6 +293,15 @@ public class NavigationBot : MonoBehaviour, IMove
 
         MoveCorotine = Movement();
         StartCoroutine(MoveCorotine);
+    }
+    public void StartWayHero(HeroControl hero)
+    {
+        if (hero.Pursuer.IndexOf(_enemyMain) == -1)
+            hero.Pursuer.Add(_enemyMain);
+
+        ResetPath();
+        //_enemyMain.InitializationHeroTarget(hero);
+        StartWay(GetNearestPlace(hero));
     }
     public void StopMove(IEnumerator Corotine)
     {
