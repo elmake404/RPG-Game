@@ -6,10 +6,17 @@ public class HeroControl : MonoBehaviour
 {
     [SerializeField]
     private Navigation _navigationHero;
-
+    private EnemyManager _enemyManager;
     private int _maxCountEnemy;
-    public bool d;
+    private bool _isCatch = false;// true когда враг рядом 
+    [SerializeField]
+    private float _healthPoints, _attackPower;
+    private float _timeBetweenAttacks;//выведи потом константу
 
+    [HideInInspector]
+    public EnemyControl EnemyTarget;
+    [HideInInspector]
+    public bool IsAttack;
     public Animator Animator;
     [HideInInspector]
     public Dictionary<int, AnApproacData> AnApproac = new Dictionary<int, AnApproacData>();
@@ -24,18 +31,61 @@ public class HeroControl : MonoBehaviour
 
     private void Update()
     {
+        if (_healthPoints <= 0)
+        {
+            _enemyManager.RemoveHero(this);
+            if (EnemyTarget != null)
+            {
+                EnemyTarget.RemoveHero(this);
+            }
+            HexagonMain.Gap();
+            Destroy(gameObject);
+        }
+
+        RecordApproac();// надо с этим чтото делать
+
+                        // атака
+        //if (EnemyTarget != null)
+        //{
+        //    if (EnemyPresence())
+        //    {
+        //        if (_timeBetweenAttacks <= 0)
+        //            if (!IsAttack && System.Math.Round(((Vector2)EnemyTarget.transform.position - (Vector2)transform.position).magnitude, 2) == 3.46)
+        //            {
+        //                StartCoroutine(Attack());
+        //            }
+        //    }
+        //    //else if (!ImoveMain.IsGo() && HeroTarget != null && !IsAttack && _navigationBot.ExpectationCorotine == null)
+        //    //{
+        //    //    _navigationBot.StartWayHero(HeroTarget);
+        //    //}
+        //}
+
         //if (Input.GetKeyDown(KeyCode.Space))
         //{
-        //    for (int i = 0; i < AnApproac.Count; i++)
-        //    {
-        //        if (AnApproac[i].hexagon!=null==HexagonMain)
-        //        {
-        //            AnApproac[i].hexagon.Flag();
-        //            AnApproac[0].hexagon.Flag();
-        //        }
-        //    }
+        //HexagonMain.Flag();
         //}
     }
+    private void FixedUpdate()
+    {
+        if (_timeBetweenAttacks > 0)
+        {
+            _timeBetweenAttacks -= Time.deltaTime;
+        }
+    }
+    private IEnumerator Attack()
+    {
+        IsAttack = true;
+        //_navigationHero.ResetPath();
+        //Debug.Log(1111111111);
+        StartCoroutine(_navigationHero.StopSpeed(0.6f));
+        yield return new WaitForSeconds(0.5f);
+        EnemyTarget.Damage(_attackPower);
+        _timeBetweenAttacks = 0.2f;
+        IsAttack = false;
+        //_navigationHero.Continue();
+    }
+
     private void RecordApproac()
     {
         bool elevation = gameObject.layer != 8;
@@ -61,7 +111,7 @@ public class HeroControl : MonoBehaviour
                 {
                     HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row - 1, hexagon.Column + 1].GetHexagonMain(elevation);
                     AnApproac[1].hexagon = hexagonControl;
-                    if ((hexagonControl!=null) &&!hexagonControl.IsFree)
+                    if ((hexagonControl != null) && !hexagonControl.IsFree)
                     {
                         AnApproac[1].busy = true;
                     }
@@ -126,7 +176,7 @@ public class HeroControl : MonoBehaviour
 
         if (hexagon.Row < MapControlStatic.mapNav.GetLength(0) - 1)
         {
-            HexagonControl hexagonCon =MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column].GetHexagonMain(elevation);
+            HexagonControl hexagonCon = MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column].GetHexagonMain(elevation);
             AnApproac[4].hexagon = hexagonCon;
             if ((hexagonCon != null) && !hexagonCon.IsFree)
             {
@@ -137,7 +187,7 @@ public class HeroControl : MonoBehaviour
             {
                 if (hexagon.Column < MapControlStatic.mapNav.GetLength(1) - 1)//2
                 {
-                    HexagonControl hexagonControl =MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column + 1].GetHexagonMain(elevation);
+                    HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column + 1].GetHexagonMain(elevation);
                     AnApproac[5].hexagon = hexagonControl;
                     if ((hexagonControl != null) && !hexagonControl.IsFree)
                     {
@@ -173,6 +223,38 @@ public class HeroControl : MonoBehaviour
             AnApproac[5].hexagon = null;
         }
     }
+    private bool SearchApproac()
+    {
+        List<HexagonControl> hexagons = GetSurroundingHexes();
+        for (int i = 0; i < hexagons.Count; i++)
+        {
+            if (hexagons[i].ObjAbove != null)
+            {
+                if (hexagons[i].ObjAbove.GetEnemy() == EnemyTarget)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private void EnemyConnect(EnemyControl enemy)
+    {
+        _isCatch = true;
+        _navigationHero.StartWayEnemy(enemy);
+    }
+    public void EnemyConnect()
+    {
+        _isCatch = true;
+    }
+    public void DisConectEnemy()
+    {
+        if (EnemyTarget != null)
+        {
+            EnemyTarget.RemoveHero(this);
+            EnemyTarget = null;
+        }
+    }
     public List<HexagonControl> GetSurroundingHexes()
     {
         //RecordApproac();
@@ -194,10 +276,23 @@ public class HeroControl : MonoBehaviour
         {
             if (!hex.IsFree)
             {
-                _navigationHero.StopMove(MoveCor);
+
+                IMove Enemy = EnemyTarget != null ? EnemyTarget.ImoveMain : null;
+                if (hex.ObjAbove == Enemy)
+                {
+                    //Debug.Log(Enemy);
+                    EnemyConnect(EnemyTarget);
+                }
+                else
+                    _navigationHero.StopMove(MoveCor);
             }
             else
             {
+                if (hex.TypeHexagon == 1)
+                {
+                    Debug.LogError("da");
+                }
+
                 HexagonMain.Gap();
                 HexagonMain = hex;
                 HexagonMain.Contact(_navigationHero);
@@ -207,15 +302,27 @@ public class HeroControl : MonoBehaviour
             }
         }
     }
-
-    public void TravelMessage()
+    private void TravelMessage()
     {
         for (int i = 0; i < Pursuer.Count; i++)
         {
             Pursuer[i].ReachRheck();
         }
     }
-
+    public void ReachRheck()
+    {
+        if (_isCatch)
+        {
+            if (!SearchApproac())
+            {
+                _navigationHero.StartWayEnemy(EnemyTarget);
+            }
+        }
+        else
+        {
+            StartWay(EnemyTarget.HexagonMain);
+        }
+    }
     public bool IsFreePlace()
     {
         for (int i = 0; i < AnApproac.Count; i++)
@@ -244,7 +351,7 @@ public class HeroControl : MonoBehaviour
     }
     public HexagonControl RandomPlace(out int namber)
     {
-         namber = Random.Range(0, AnApproac.Count);
+        namber = Random.Range(0, AnApproac.Count);
 
         while (AnApproac[namber].hexagon == null)
         {
@@ -254,6 +361,29 @@ public class HeroControl : MonoBehaviour
         AnApproac[namber].busy = true;
         return hexagon;
     }
+    public void StartWayEnemy(HexagonControl hexagonFinish, EnemyControl enemy)
+    {
+        EnemyTarget = enemy;
+        enemy.AddNewHero(this);
+        if (!SearchApproac())
+        {
+
+            _navigationHero.StartWay(hexagonFinish);
+        }
+        else
+        {
+            EnemyConnect(EnemyTarget);
+        }
+    }
+    public void StartWayElevationEnemy(HexagonControl hexagonFinish, EnemyControl enemy)
+    {
+        EnemyTarget = enemy;
+
+        if (!SearchApproac())
+        {
+            _navigationHero.StartWayElevation(hexagonFinish);
+        }
+    }
     public void StartWay(HexagonControl hexagonFinish)
     {
         _navigationHero.StartWay(hexagonFinish);
@@ -262,8 +392,9 @@ public class HeroControl : MonoBehaviour
     {
         _navigationHero.StartWayElevation(hexagonFinish);
     }
-    public void Initialization(HexagonControl[] _arrey)
+    public void Initialization(HexagonControl[] _arrey, EnemyManager enemyManager)
     {
+        _enemyManager = enemyManager;
         _maxCountEnemy = 6;
         for (int i = 0; i < 6; i++)
         {
@@ -271,9 +402,16 @@ public class HeroControl : MonoBehaviour
         }
         HexagonMain = MapControlStatic.FieldPosition(gameObject.layer, transform.position);
         HexagonMain.Contact(_navigationHero);
+        //незабудь удалить
+        transform.position = (Vector2)HexagonMain.transform.position;
 
         RecordApproac();
         _navigationHero.Initialization(_arrey, this);
+    }
+    public void Damage(float AttackPower)
+    {
+        _healthPoints -= AttackPower;
+
     }
     public void AddNewEnemy(EnemyControl enemy)
     {
@@ -283,12 +421,30 @@ public class HeroControl : MonoBehaviour
             _maxCountEnemy--;
         }
     }
-    public void RemoveEnemy()
+    public void RemoveEnemy(EnemyControl enemy)
     {
+        Pursuer.Remove(enemy);
+
         _maxCountEnemy++;
     }
     public int CountEnemy()
     {
         return _maxCountEnemy;
     }
+    public bool EnemyPresence()
+    {
+        List<HexagonControl> hexagons = GetSurroundingHexes();
+        for (int i = 0; i < hexagons.Count; i++)
+        {
+            if (hexagons[i].ObjAbove != null)
+            {
+                if (hexagons[i].ObjAbove.GetEnemy() == EnemyTarget)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

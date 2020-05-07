@@ -129,7 +129,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _navigationHero: {fileID: 1079215778108624622}
+  _healthPoints: 20
+  _attackPower: 2
+  EnemyTarget: {fileID: 0}
+  IsAttack: 0
   Animator: {fileID: 6294914234715882394}
+  Pursuer: []
   HexagonMain: {fileID: 0}
 --- !u!114 &1079215778108624622
 MonoBehaviour:
@@ -143,6 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c428aa37da4259b40a971083d8e25c6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _targetHexagon: {fileID: 0}
   _speed: 0.4
 --- !u!50 &8699803935369676830
 Rigidbody2D:

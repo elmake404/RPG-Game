@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8357822781207716668}
   m_Layer: 8
   m_Name: Monster
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -49,7 +49,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _navigationBot: {fileID: 9078954178657922540}
+  _healthPoints: 5
+  _attackPower: 1
   HexagonMain: {fileID: 0}
+  HeroTarget: {fileID: 0}
+  Pursuer: []
+  IsAttack: 0
 --- !u!114 &9078954178657922540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,8 +67,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6464d683af610d4497d753cbd579c25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _targetHexagon: {fileID: 0}
+  g: {fileID: 0}
   _enemyMain: {fileID: 2822881598915167576}
+  CurrentPos: {x: 0, y: 0}
+  _isStop: 0
+  _isMove: 0
+  _isBypass: 0
+  _isToTheHero: 0
+  _isMoveHex: 0
+  m: 0
+  b: 0
   _speed: 0.4
+  _namberAnApproac: 0
 --- !u!50 &7993630380409840971
 Rigidbody2D:
   serializedVersion: 4
@@ -206,12 +222,12 @@ PrefabInstance:
     - target: {fileID: 1093245753956042765, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.5
+      value: -0.78
       objectReference: {fileID: 0}
     - target: {fileID: 1093245753956042765, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.7
+      value: 2.913
       objectReference: {fileID: 0}
     - target: {fileID: 1093245753956042765, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
         type: 3}
@@ -261,7 +277,12 @@ PrefabInstance:
     - target: {fileID: 1093245753956042765, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 2
+      value: 1.298179
+      objectReference: {fileID: 0}
+    - target: {fileID: 1093245753956042765, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.8446414
       objectReference: {fileID: 0}
     - target: {fileID: 5026488433382046821, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
         type: 3}
@@ -276,7 +297,7 @@ PrefabInstance:
     - target: {fileID: 5026488433382046821, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c1d7f6489ef6f0479d7f5fb88b2c83c, type: 3}

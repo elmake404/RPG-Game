@@ -28,9 +28,10 @@ public class MapControl : MonoBehaviour
                 hexagon.NamberHex();
             }
         }
+
         for (int i = 0; i < _heroControls.Length; i++)
         {
-            _heroControls[i].Initialization(_arreyVertex);
+            _heroControls[i].Initialization(_arreyVertex,enemyManager);
         }
         GraphRecord();
 

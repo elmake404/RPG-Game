@@ -9,7 +9,6 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         _camera = Camera.main;
-        //MapControlStatic.ListPoint.Add(MapControlStatic.mapNav[3, 17]);
     }
 
     void Update()
@@ -37,6 +36,7 @@ public class PlayerControl : MonoBehaviour
 
                     if ((Collider.gameObject.layer == 9 || Collider.gameObject.layer == 10) && Hexagon.TypeHexagon != 1)
                     {
+                        _heroControl.DisConectEnemy();
                         if (_heroControl.gameObject.layer == 8)
                         {
                             _heroControl.StartWay(Hexagon);
@@ -45,14 +45,20 @@ public class PlayerControl : MonoBehaviour
                         {
                             _heroControl.StartWayElevation(Hexagon);
                         }
-
                     }
-                    else if (Collider.gameObject.layer == 10 && Hexagon.TypeHexagon != 1)
+                    else if (Collider.tag == "Enemy")
                     {
+                        var Enemy = Collider.GetComponent<EnemyControl>();
+
+                        if (_heroControl.gameObject.layer == 8)
+                        {
+                            _heroControl.StartWayEnemy(Enemy.HexagonMain, Enemy);
+                        }
+                        else
+                        {
+                            _heroControl.StartWayElevation(Enemy.HexagonMain);
+                        }
                     }
-                }
-                else
-                {
                 }
             }
             _heroControl = null;
