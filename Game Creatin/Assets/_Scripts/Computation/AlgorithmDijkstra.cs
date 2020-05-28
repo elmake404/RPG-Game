@@ -9,7 +9,56 @@ class DijkstraData
 }
 public class AlgorithmDijkstra
 {
-    public List<Node> Dijkstra(Graph graph )
+    public List<HexagonControl> Dijkstra( Graph _graph,Node start,Node finish)
+    {
+        Graph graph = new Graph(_graph);
+        var notVisited = graph.GetListNodes();
+        var track = new Dictionary<Node, DijkstraData>();
+        track[start] = new DijkstraData { Previous = null, Price = 0 };
+        while (true)
+        {
+            Node toOpen = null;
+            float priceToOpen = float.PositiveInfinity;
+            foreach (var v in notVisited)
+            {
+                if (track.ContainsKey(v)&&track[v].Price<priceToOpen)
+                {
+                    toOpen = v;
+                    priceToOpen = track[v].Price;
+                }
+            }
+            if (toOpen==null)
+            {
+                //Debug.Log("Disconnected graph");
+                return null;
+            }
+            if (toOpen == finish)
+            {
+                break;
+            }
+            List<Edge> edgesList = toOpen.IncidentEdge();
+            for (int i = 0; i < edgesList.Count; i++)
+            {
+                var currenPraise = track[toOpen].Price + edgesList[i].Price;
+                var nextNode = edgesList[i].OtherNode(toOpen);
+                if (!track.ContainsKey(nextNode)||track[nextNode].Price>currenPraise)
+                {
+                    track[nextNode] = new DijkstraData { Price = currenPraise, Previous = toOpen };
+                }
+            }
+            notVisited.Remove(toOpen);
+        }
+        var result = new List<HexagonControl>();
+        Node end = finish;
+        while (end != null)
+        {
+            result.Add(end.NodeHexagon);
+            end = track[end].Previous;
+        }
+        result.Reverse();
+        return result;
+    }
+    public List<Node> Dijkstra(Graph graph,Node finish)
     {
         var notVisited = graph.GetListNodes();
         var track = new Dictionary<Node, DijkstraData>();
@@ -22,7 +71,6 @@ public class AlgorithmDijkstra
             {
                 if (track.ContainsKey(v)&&track[v].Price<priceToOpen)
                 {
-
                     toOpen = v;
                     priceToOpen = track[v].Price;
                 }
@@ -32,7 +80,7 @@ public class AlgorithmDijkstra
                 //Debug.Log("Disconnected graph");
                 return null;
             }
-            if (toOpen == graph[graph.Length - 1])
+            if (toOpen == finish)
             {
                 break;
             }

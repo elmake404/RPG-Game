@@ -72,10 +72,11 @@
     <Compile Include="Assets\_Scripts\IMove.cs" />
     <Compile Include="Assets\_Scripts\Map\HexagonControl.cs" />
     <Compile Include="Assets\_Scripts\Map\MapControl.cs" />
-    <Compile Include="Assets\_Scripts\Map\MapControlStatic.cs" />
-    <Compile Include="Assets\_Scripts\Navigation\NavControl.cs" />
-    <Compile Include="Assets\_Scripts\Navigation\Navigation.cs" />
-    <Compile Include="Assets\_Scripts\Navigation\NavigationBot.cs" />
+    <Compile Include="Assets\_Scripts\Map\Old\MapControlStatic.cs" />
+    <Compile Include="Assets\_Scripts\Navigation\NavAgent\Navigation.cs" />
+    <Compile Include="Assets\_Scripts\Navigation\NavAgent\NavigationBot.cs" />
+    <Compile Include="Assets\_Scripts\Navigation\NavStatic.cs" />
+    <Compile Include="Assets\_Scripts\Navigation\NavSurface.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\AnimationEvents.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\BowShooting.cs" />

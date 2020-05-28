@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 
 public class Edge
 {
@@ -37,6 +37,8 @@ public class Edge
 public class Node
 {
     private readonly List<Edge> incidentEdge = new List<Edge>();
+
+    public List<Node> ListUnrelated = new List<Node>();
     public int NodeNumber;
     public readonly HexagonControl NodeHexagon;
 

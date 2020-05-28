@@ -167,7 +167,7 @@ public class Navigation : MonoBehaviour, IMove
         graphMain.AddNodeFirst(From);
         graphMain.AddNode(to);
 
-        List<Node> nodesList = _algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(graphMain));
+        List<Node> nodesList = _algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(graphMain), graphMain[graphMain.Length - 1]);
 
         if (nodesList == null)
         {
@@ -196,7 +196,9 @@ public class Navigation : MonoBehaviour, IMove
     }
     private List<HexagonControl> Bypass(List<HexagonControl> hexagons)//метод обхода
     {
-        List<Node> nodesList = _algorithmDijkstra.Dijkstra(MapControlStatic.CreatingEdge(hexagons, this));
+        Graph graphMain = MapControlStatic.CreatingEdge(hexagons, this);
+
+        List<Node> nodesList = _algorithmDijkstra.Dijkstra(graphMain, graphMain[graphMain.Length-1]);
         if (nodesList == null)
         {
             return null;

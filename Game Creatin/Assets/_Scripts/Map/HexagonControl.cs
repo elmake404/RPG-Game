@@ -7,6 +7,8 @@ public class HexagonControl : MonoBehaviour
     [SerializeField]
     private GameObject _flag;
 
+    [HideInInspector]
+    public Dictionary<HexagonControl, List<HexagonControl>> ShortWay = new Dictionary<HexagonControl, List<HexagonControl>>();
     public HexagonControl Elevation, Floor;
     [System.NonSerialized]
     public int Row, Column;
@@ -18,8 +20,6 @@ public class HexagonControl : MonoBehaviour
     //[SerializeField]
     public bool IsFree = true;
 
-    //[SerializeField]
-    //float mag,  mag2;
     private void Awake()
     {
         if (Elevation != null)
@@ -32,26 +32,6 @@ public class HexagonControl : MonoBehaviour
             }
         }
     }
-    void Start()
-    {
-        //if (TypeHexagon != 2)
-        //{
-        //    Row = System.Convert.ToInt32
-        //        (transform.parent.name);
-        //    Column = System.Convert.ToInt32
-        //        (name);
-        //}
-        //if (Floor != null)
-        //{
-        //    Floor.Flag();
-        //}
-    }
-
-    void Update()
-    {
-
-    }
-
     public bool FreedomTestType(bool Elevtion)
     {
         if (!Elevtion)
@@ -134,28 +114,6 @@ public class HexagonControl : MonoBehaviour
                 (transform.parent.name);
             Column = System.Convert.ToInt32
                 (name);
-        }
-    }
-    public bool IsFreeTest(EnemyControl enemy)
-    {
-        if (enemy == ObjAbove.GetEnemy() || IsFree)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    public bool IsFreeTestHex()
-    {
-        if ((IsFree) || (!IsFree && !ObjAbove.IsGo()))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
         }
     }
     public void Contact(IMove move)

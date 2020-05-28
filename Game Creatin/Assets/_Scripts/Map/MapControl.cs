@@ -5,6 +5,8 @@ using UnityEngine;
 public class MapControl : MonoBehaviour
 {
     [SerializeField]
+    private NavSurface _navSurface;
+    [SerializeField]
     private EnemyManager enemyManager;
     [SerializeField]
     private Transform[] hexagons;
@@ -26,6 +28,8 @@ public class MapControl : MonoBehaviour
                 MapControlStatic.mapNav[i, j] = hexagon;
                 hexagons[i].GetChild(j).name = j.ToString();
                 hexagon.NamberHex();
+                if(hexagon.GetHexagonMain().TypeHexagon!=1)
+                _navSurface.ListHexagonControls.Add(hexagon.GetHexagonMain());
             }
         }
 
@@ -33,7 +37,7 @@ public class MapControl : MonoBehaviour
         {
             _heroControls[i].Initialization(_arreyVertex,enemyManager);
         }
-        GraphRecord();
+        //GraphRecord();
 
         //for (int i = 0; i < _enemyControls.Length; i++)
         //{

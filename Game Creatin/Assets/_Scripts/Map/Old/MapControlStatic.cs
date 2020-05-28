@@ -767,7 +767,7 @@ public static class MapControlStatic
         Vector2 difference = layer == 8 ? Vector2.zero : new Vector2(X, Y);
         int layerHex = layer == 8 ? 9 : 12;
         HexagonControl hexagon = GetPositionOnTheMap(position - difference, layerHex);
-        if (hexagon==null)
+        if (hexagon == null)
         {
             Debug.Log(layerHex);
         }
@@ -1317,7 +1317,7 @@ public static class MapControlStatic
         int _columbias = (_row % 2) == 0 ? 1 : -1;
         if (((Vector2)mapNav[_row, _column].transform.position - pos).magnitude <= 1.8f)
         {
-            if (mapNav[_row, _column].gameObject.layer == Layer && (mapNav[_row, _column].TypeHexagon != 1|| Layer == 12) || (Layer == 12 && mapNav[_row, _column].TypeHexagon == 3))
+            if (mapNav[_row, _column].gameObject.layer == Layer && (mapNav[_row, _column].TypeHexagon != 1 || Layer == 12) || (Layer == 12 && mapNav[_row, _column].TypeHexagon == 3))
                 return mapNav[_row, _column];
         }
 
@@ -1350,7 +1350,7 @@ public static class MapControlStatic
         for (int i = 0; i < hexagons.Count; i++)
         {
 
-            if (hexagons[i].gameObject.layer == Layer && (hexagons[i].TypeHexagon != 1 || Layer == 12)||(Layer==12&& hexagons[i].TypeHexagon == 3))
+            if (hexagons[i].gameObject.layer == Layer && (hexagons[i].TypeHexagon != 1 || Layer == 12) || (Layer == 12 && hexagons[i].TypeHexagon == 3))
             {
 
                 if (mag > ((Vector2)hexagons[i].transform.position - pos).magnitude)
@@ -1371,7 +1371,7 @@ public static class MapControlStatic
                 }
             }
         }
-        
+
         return hexagon;
     }
     private static HexagonControl OwnershipCheckadditional(int _row, int _column, Vector2 pos)
