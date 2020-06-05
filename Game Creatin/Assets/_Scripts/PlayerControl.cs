@@ -61,6 +61,20 @@ public class PlayerControl : MonoBehaviour
                     }
                 }
             }
+            if (Collider != null)
+            {
+                var Hexagon = Collider.GetComponent<HexagonControl>();
+
+                if ((Collider.gameObject.layer == 9 || Collider.gameObject.layer == 10) && Hexagon.TypeHexagon != 1)
+                {
+                    List<HexagonControl> Way = MapControl.MapNav[0, 0].GetWay(Hexagon);
+                    for (int i = 0; i < Way.Count; i++)
+                    {
+                        Way[i].Flag();
+                    }
+                }
+
+            }
             _heroControl = null;
         }
 

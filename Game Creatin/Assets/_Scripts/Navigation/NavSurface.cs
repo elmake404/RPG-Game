@@ -5,35 +5,54 @@ using UnityEngine;
 public class NavSurface : MonoBehaviour
 {
     [HideInInspector]
-    public List<HexagonControl> ListHexagonControls = new List<HexagonControl>();
+    public Graph GraphNav;// граф в котором соеденены все ребра 
+    public MapControl Map;
+    //[HideInInspector]
+    public List<HexagonControl> ListHexagonControls ;
+
     private AlgorithmDijkstra _algorithmDijkstra = new AlgorithmDijkstra();
 
 
     void Start()
     {
-        StartCoroutine(CreatingEdge());
     }
 
     void Update()
     {
 
     }
-    private IEnumerator CreatingEdge()
+    public void DataRecords()
     {
-        NavStatic.GraphStatic = new Graph(ListHexagonControls);
-        for (int i = 0; i < NavStatic.GraphStatic.Length - 1; i++)
+        ListHexagonControls = new List<HexagonControl>();
+        Map.DataRecords();
+        for (int i = 0; i < ListHexagonControls.Count; i++)
         {
-            for (int j = i + 1; j < NavStatic.GraphStatic.Length; j++)
-            {
-                bool IsElevation = false;
+            ListHexagonControls[i].CheckDataComponent();
+        }
 
-                Vector2 StartPosition = NavStatic.GraphStatic[i].NodeHexagon.transform.position;
-                Vector2 direction = NavStatic.GraphStatic[j].NodeHexagon.transform.position;
+    }
+    public void CreatingEdge()
+    {
+        Debug.Log("Ribs start");
+        GraphNav = new Graph(ListHexagonControls);
+        for (int i = 0; i < ListHexagonControls.Count; i++)
+        {
+            ListHexagonControls[i].Data.CreateNewList() ;
+        }
+
+        for (int i = 0; i <  GraphNav.Length - 1; i++)
+        {
+            for (int j = i + 1; j < GraphNav.Length; j++)
+            {
+                bool IsElevation;
+
+                Vector2 StartPosition = GraphNav[i].NodeHexagon.transform.position;
+                Vector2 direction = GraphNav[j].NodeHexagon.transform.position;
 
                 bool NoRibs = false;
 
-                if (NavStatic.GraphStatic[i].NodeHexagon.TypeHexagon <= 0
-                    || (NavStatic.GraphStatic[i].NodeHexagon.TypeHexagon == 3 && NavStatic.GraphStatic[j].NodeHexagon.gameObject.layer != 10))
+                if (GraphNav[i].NodeHexagon.TypeHexagon <= 0
+                    || (GraphNav[i].NodeHexagon.TypeHexagon == 3 && GraphNav[j].NodeHexagon.gameObject.layer != 10))
                 {
                     IsElevation = false;
                     if (!NavStatic.CollisionCheck(StartPosition, direction, IsElevation))
@@ -52,36 +71,111 @@ public class NavSurface : MonoBehaviour
 
                 if (!NoRibs)
                 {
-                    float magnitude = (NavStatic.GraphStatic[i].NodeHexagon.transform.position - NavStatic.GraphStatic[j].NodeHexagon.transform.position).magnitude;
-                    NavStatic.GraphStatic[i].Connect(NavStatic.GraphStatic[j], magnitude, null);
-                    NavStatic.GraphStatic[i].NodeHexagon.ShortWay[NavStatic.GraphStatic[j].NodeHexagon] = new List<HexagonControl>() { NavStatic.GraphStatic[j].NodeHexagon };
+                    float magnitude = (GraphNav[i].NodeHexagon.transform.position - GraphNav[j].NodeHexagon.transform.position).magnitude;
+                    GraphNav[i].Connect(GraphNav[j], magnitude, null);
+
+                    GraphNav[i].NodeHexagon.Data.SaveTheWay(GraphNav[j].NodeHexagon, GraphNav[j].NodeHexagon);
+                    GraphNav[j].NodeHexagon.Data.SaveTheWay(GraphNav[i].NodeHexagon, GraphNav[i].NodeHexagon);
                 }
                 else
                 {
-                    NavStatic.GraphStatic[i].ListUnrelated.Add(NavStatic.GraphStatic[j]);
+                    GraphNav[i].ListUnrelated.Add(GraphNav[j]);
                 }
             }
-            yield return new WaitForSeconds(0.02f);
         }
         Debug.Log("Ribs completed");
-        //NavStatic.GraphStatic[0].ListUnrelated[0].NodeHexagon.Flag();
-
-        for (int i = 0; i < NavStatic.GraphStatic.Length - 1; i++)
+    }
+    public void AlgorithmDijkstra()
+    {
+        for (int i = 0; i < GraphNav.Length - 1; i++)
         {
-            for (int j = 0; j < NavStatic.GraphStatic[i].ListUnrelated.Count; j++)
+            for (int j = 0; j < GraphNav[i].ListUnrelated.Count; j++)
             {
-                List<HexagonControl> hexagonList = _algorithmDijkstra.Dijkstra(NavStatic.GraphStatic, NavStatic.GraphStatic[i], NavStatic.GraphStatic[i].ListUnrelated[j]);
+                List<HexagonControl> hexagonList = _algorithmDijkstra.Dijkstra(GraphNav, GraphNav[i], GraphNav[i].ListUnrelated[j]);
                 if (hexagonList == null)
                 {
-                    //NavStatic.GraphStatic[i].ListUnrelated.Remove(NavStatic.GraphStatic[i].ListUnrelated[0]);
+                    Debug.Log("Pizdec");
                     continue;
                 }
 
-                NavStatic.GraphStatic[i].NodeHexagon.ShortWay[NavStatic.GraphStatic[i].ListUnrelated[0].NodeHexagon] = hexagonList;
-                yield return new WaitForSeconds(0.02f);
+                GraphNav[i].NodeHexagon.Data.SaveTheWay(GraphNav[i].ListUnrelated[j].NodeHexagon, hexagonList);
+                hexagonList.Reverse();
+                GraphNav[i].ListUnrelated[j].NodeHexagon.Data.SaveTheWay(GraphNav[i].NodeHexagon, hexagonList);
             }
-            NavStatic.GraphStatic[i].ListUnrelated.Clear();
+
+            GraphNav[i].ListUnrelated.Clear();
         }
         Debug.Log("Compled ");
     }
+    public void chekc()
+    {
+        ListHexagonControls[3].Data.check() ;
+    }
+    //private IEnumerator CreatingEdge()
+    //{
+    //    GraphNav = new Graph(ListHexagonControls);
+    //    Debug.Log(ListHexagonControls.Count);
+    //    for (int i = 0; i < GraphNav.Length - 1; i++)
+    //    {
+    //        for (int j = i + 1; j < GraphNav.Length; j++)
+    //        {
+    //            bool IsElevation = false;
+
+    //            Vector2 StartPosition = GraphNav[i].NodeHexagon.transform.position;
+    //            Vector2 direction = GraphNav[j].NodeHexagon.transform.position;
+
+    //            bool NoRibs = false;
+
+    //            if (GraphNav[i].NodeHexagon.TypeHexagon <= 0
+    //                || (GraphNav[i].NodeHexagon.TypeHexagon == 3 && GraphNav[j].NodeHexagon.gameObject.layer != 10))
+    //            {
+    //                IsElevation = false;
+    //                if (!NavStatic.CollisionCheck(StartPosition, direction, IsElevation))
+    //                {
+    //                    NoRibs = true;
+    //                }
+    //            }
+    //            else
+    //            {
+    //                IsElevation = true;
+    //                if (!NavStatic.CollisionCheckElevation(StartPosition, direction, IsElevation))
+    //                {
+    //                    NoRibs = true;
+    //                }
+    //            }
+
+    //            if (!NoRibs)
+    //            {
+    //                float magnitude = (GraphNav[i].NodeHexagon.transform.position - GraphNav[j].NodeHexagon.transform.position).magnitude;
+    //                GraphNav[i].Connect(GraphNav[j], magnitude, null);
+    //                GraphNav[i].NodeHexagon.ShortWay[GraphNav[j].NodeHexagon] = new List<HexagonControl>() { GraphNav[j].NodeHexagon };
+    //            }
+    //            else
+    //            {
+    //                GraphNav[i].ListUnrelated.Add(GraphNav[j]);
+    //            }
+    //        }
+    //        yield return new WaitForSeconds(0.02f);
+    //    }
+    //    Debug.Log("Ribs completed");
+    //    GraphNav[0].ListUnrelated[0].NodeHexagon.Flag();
+
+    //    for (int i = 0; i < GraphNav.Length - 1; i++)
+    //    {
+    //        for (int j = 0; j < GraphNav[i].ListUnrelated.Count; j++)
+    //        {
+    //            List<HexagonControl> hexagonList = _algorithmDijkstra.Dijkstra(GraphNav, GraphNav[i], GraphNav[i].ListUnrelated[j]);
+    //            if (hexagonList == null)
+    //            {
+    //                continue;
+    //            }
+
+    //            GraphNav[i].NodeHexagon.ShortWay[GraphNav[i].ListUnrelated[0].NodeHexagon] = hexagonList;
+    //        }
+    //        yield return new WaitForSeconds(0.02f);
+
+    //        GraphNav[i].ListUnrelated.Clear();
+    //    }
+    //    Debug.Log("Compled ");
+    //}
 }

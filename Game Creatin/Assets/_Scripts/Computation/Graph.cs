@@ -116,7 +116,7 @@ public class Graph
     }
     public void AddNodeFirst(HexagonControl newNode)
     {
-        nodes.Insert(0, new Node(0, newNode));
+        nodes.Insert(0, new Node(0, newNode)); 
         for (int i = 1; i < nodes.Count; i++)
         {
             nodes[i].NodeNumber += 1;
