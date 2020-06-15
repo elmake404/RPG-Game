@@ -37,43 +37,16 @@ public class PlayerControl : MonoBehaviour
                     if ((Collider.gameObject.layer == 9 || Collider.gameObject.layer == 10) && Hexagon.TypeHexagon != 1)
                     {
                         _heroControl.DisConectEnemy();
-                        if (_heroControl.gameObject.layer == 8)
-                        {
-                            _heroControl.StartWay(Hexagon);
-                        }
-                        else
-                        {
-                            _heroControl.StartWayElevation(Hexagon);
-                        }
+                        _heroControl.StartWay(Hexagon);
+
                     }
                     else if (Collider.tag == "Enemy")
                     {
                         var Enemy = Collider.GetComponent<EnemyControl>();
 
-                        if (_heroControl.gameObject.layer == 8)
-                        {
-                            _heroControl.StartWayEnemy(Enemy.HexagonMain, Enemy);
-                        }
-                        else
-                        {
-                            _heroControl.StartWayElevation(Enemy.HexagonMain);
-                        }
+                        _heroControl.StartWayEnemy( Enemy);
                     }
                 }
-            }
-            if (Collider != null)
-            {
-                var Hexagon = Collider.GetComponent<HexagonControl>();
-
-                if ((Collider.gameObject.layer == 9 || Collider.gameObject.layer == 10) && Hexagon.TypeHexagon != 1)
-                {
-                    List<HexagonControl> Way = MapControl.MapNav[0, 0].GetWay(Hexagon);
-                    for (int i = 0; i < Way.Count; i++)
-                    {
-                        Way[i].Flag();
-                    }
-                }
-
             }
             _heroControl = null;
         }

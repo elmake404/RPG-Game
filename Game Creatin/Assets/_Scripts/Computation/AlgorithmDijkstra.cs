@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 class DijkstraData
@@ -9,7 +10,7 @@ class DijkstraData
 }
 public class AlgorithmDijkstra
 {
-    public List<HexagonControl> Dijkstra( Graph _graph,Node start,Node finish)
+    public List<HexagonControl> Dijkstra(Graph _graph, Node start, Node finish)
     {
         Graph graph = new Graph(_graph);
         var notVisited = graph.GetListNodes();
@@ -21,13 +22,13 @@ public class AlgorithmDijkstra
             float priceToOpen = float.PositiveInfinity;
             foreach (var v in notVisited)
             {
-                if (track.ContainsKey(v)&&track[v].Price<priceToOpen)
+                if (track.ContainsKey(v) && track[v].Price < priceToOpen)
                 {
                     toOpen = v;
                     priceToOpen = track[v].Price;
                 }
             }
-            if (toOpen==null)
+            if (toOpen == null)
             {
                 //Debug.Log("Disconnected graph");
                 return null;
@@ -41,7 +42,7 @@ public class AlgorithmDijkstra
             {
                 var currenPraise = track[toOpen].Price + edgesList[i].Price;
                 var nextNode = edgesList[i].OtherNode(toOpen);
-                if (!track.ContainsKey(nextNode)||track[nextNode].Price>currenPraise)
+                if (!track.ContainsKey(nextNode) || track[nextNode].Price > currenPraise)
                 {
                     track[nextNode] = new DijkstraData { Price = currenPraise, Previous = toOpen };
                 }
@@ -58,7 +59,7 @@ public class AlgorithmDijkstra
         result.Reverse();
         return result;
     }
-    public List<Node> Dijkstra(Graph graph,Node finish)
+    public List<Node> Dijkstra(Graph graph, Node finish)
     {
         var notVisited = graph.GetListNodes();
         var track = new Dictionary<Node, DijkstraData>();
@@ -69,13 +70,13 @@ public class AlgorithmDijkstra
             float priceToOpen = float.PositiveInfinity;
             foreach (var v in notVisited)
             {
-                if (track.ContainsKey(v)&&track[v].Price<priceToOpen)
+                if (track.ContainsKey(v) && track[v].Price < priceToOpen)
                 {
                     toOpen = v;
                     priceToOpen = track[v].Price;
                 }
             }
-            if (toOpen==null)
+            if (toOpen == null)
             {
                 //Debug.Log("Disconnected graph");
                 return null;
@@ -89,7 +90,7 @@ public class AlgorithmDijkstra
             {
                 var currenPraise = track[toOpen].Price + edgesList[i].Price;
                 var nextNode = edgesList[i].OtherNode(toOpen);
-                if (!track.ContainsKey(nextNode)||track[nextNode].Price>currenPraise)
+                if (!track.ContainsKey(nextNode) || track[nextNode].Price > currenPraise)
                 {
                     track[nextNode] = new DijkstraData { Price = currenPraise, Previous = toOpen };
                 }
@@ -106,9 +107,10 @@ public class AlgorithmDijkstra
         result.Reverse();
         return result;
     }
-    public List<HexagonControl> Dijkstra(Graph graph , out float totalPrice)
-    {
+    public List<HexagonControl> Dijkstra(Graph graph)
+    {        
         var notVisited = graph.GetListNodes();
+
         var track = new Dictionary<Node, DijkstraData>();
         track[notVisited[0]] = new DijkstraData { Previous = null, Price = 0 };
         while (true)
@@ -117,19 +119,20 @@ public class AlgorithmDijkstra
             float priceToOpen = float.PositiveInfinity;
             foreach (var v in notVisited)
             {
-                if (track.ContainsKey(v)&&track[v].Price<priceToOpen)
+                if (track.ContainsKey(v) && track[v].Price < priceToOpen)
                 {
-
                     toOpen = v;
                     priceToOpen = track[v].Price;
                 }
             }
-            if (toOpen==null)
+
+            if (toOpen == null)
             {
                 //Debug.Log("Disconnected graph");
-                totalPrice = float.PositiveInfinity;
+
                 return null;
             }
+
             if (toOpen == graph[graph.Length - 1])
             {
                 break;
@@ -139,31 +142,23 @@ public class AlgorithmDijkstra
             {
                 var currenPraise = track[toOpen].Price + edgesList[i].Price;
                 var nextNode = edgesList[i].OtherNode(toOpen);
-                if (!track.ContainsKey(nextNode)||track[nextNode].Price>currenPraise)
+                if (!track.ContainsKey(nextNode) || track[nextNode].Price > currenPraise)
                 {
                     track[nextNode] = new DijkstraData { Price = currenPraise, Previous = toOpen };
                 }
             }
             notVisited.Remove(toOpen);
         }
+
         var result = new List<HexagonControl>();
         Node end = graph[graph.Length - 1];
-        float Total = 0;
         while (end != null)
         {
-            if (Total==0)
-            {
-                Total = track[end].Price;
-                //Debug.Log(track[end].Price);
-            }
-
             result.Add(end.NodeHexagon);
             end = track[end].Previous;
         }
-        totalPrice = Total;
         result.Reverse();
         //Debug.Log(result.Count);
         return result;
     }
-
 }

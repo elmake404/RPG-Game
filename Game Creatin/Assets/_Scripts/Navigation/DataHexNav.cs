@@ -16,15 +16,8 @@ public class DataHexNav : MonoBehaviour
     {
         List<HexagonControl> NewWayList = new List<HexagonControl>();
         NewWayList.AddRange(way);
-        NewWayList.Remove(NewWayList[0]);
         EndWay.Add(endWay);
         Way.AddRange(NewWayList);
-        Way.Add(null);
-    }
-    public void SaveTheWay(HexagonControl endWay, HexagonControl way)
-    {
-        EndWay.Add(endWay);
-        Way.Add(way);
         Way.Add(null);
     }
     public void check()

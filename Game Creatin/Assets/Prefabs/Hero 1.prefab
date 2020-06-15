@@ -128,14 +128,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50a7b54e4248ea1458fa5335b3d4595b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _navigationHero: {fileID: 0}
+  _navigationHero: {fileID: 2178774874551641615}
+  _maxCountEnemy: 6
   _healthPoints: 20
   _attackPower: 2
   EnemyTarget: {fileID: 0}
   IsAttack: 0
   Animator: {fileID: 6294914234715882394}
   Pursuer: []
-  HexagonMain: {fileID: 0}
 --- !u!50 &8699803935369676830
 Rigidbody2D:
   serializedVersion: 4
@@ -200,6 +200,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d289ac19d188d824781f479ae1822106, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isMove: 0
+  _isClever: 1
+  _speed: 0.3
 --- !u!1001 &557766669171964024
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6794221790505810571}
   - component: {fileID: 2822881598915167576}
-  - component: {fileID: 9078954178657922540}
   - component: {fileID: 7993630380409840971}
   - component: {fileID: 8357822781207716668}
+  - component: {fileID: 156550093309529522}
   m_Layer: 8
   m_Name: Monster
   m_TagString: Enemy
@@ -48,38 +48,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33d1167d4fc7ec14ab31b6cbfb858a07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _navigationBot: {fileID: 9078954178657922540}
+  _navigationBot: {fileID: 156550093309529522}
   _healthPoints: 5
   _attackPower: 1
-  HexagonMain: {fileID: 0}
   HeroTarget: {fileID: 0}
   Pursuer: []
   IsAttack: 0
---- !u!114 &9078954178657922540
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1987900913563013769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6464d683af610d4497d753cbd579c25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _targetHexagon: {fileID: 0}
-  g: {fileID: 0}
-  _enemyMain: {fileID: 2822881598915167576}
-  CurrentPos: {x: 0, y: 0}
-  _isStop: 0
-  _isMove: 0
-  _isBypass: 0
-  _isToTheHero: 0
-  _isMoveHex: 0
-  m: 0
-  b: 0
-  _speed: 0.4
-  _namberAnApproac: 0
 --- !u!50 &7993630380409840971
 Rigidbody2D:
   serializedVersion: 4
@@ -132,6 +106,21 @@ PolygonCollider2D:
       - {x: 0, y: -2}
       - {x: -1.73, y: -1}
       - {x: -1.73, y: 1}
+--- !u!114 &156550093309529522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987900913563013769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d289ac19d188d824781f479ae1822106, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isMove: 0
+  _isClever: 0
+  _speed: 0.25
 --- !u!1 &5252100088159651508
 GameObject:
   m_ObjectHideFlags: 0

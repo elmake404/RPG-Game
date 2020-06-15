@@ -11,7 +11,6 @@ public class EnemyManager : MonoBehaviour
     [SerializeField]
     private List<HeroControl> _listHero = new List<HeroControl>();
     private List<EnemyControl> _listEnemyControls = new List<EnemyControl>();
-    private AlgorithmDijkstra algorithmDijkstra = new AlgorithmDijkstra();
 
     [SerializeField]
     private int _maxQuantityEnemy;
@@ -19,6 +18,11 @@ public class EnemyManager : MonoBehaviour
 
     void Start()
     {
+        foreach (var item in _listHero)
+        {
+            item.Initialization(this);
+        }
+
         if (_maxQuantityEnemy > 0)
         {
             StartCoroutine(Production());
@@ -29,14 +33,9 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-
-    }
-
     public void GoalSelection(EnemyControl enemy)
     {
-        if (_listHero.Count!=0)
+        if (_listHero.Count != 0)
         {
             int namber = Random.Range(0, _listHero.Count);
             HeroControl hero = _listHero[namber];
@@ -69,11 +68,12 @@ public class EnemyManager : MonoBehaviour
             }
             hero.AddNewEnemy(enemy);
             enemy.HeroTarget = hero;
-            enemy.StartWay(hero.HexagonMain);
+            enemy.StartWay(hero);
         }
     }
     private IEnumerator Production()
     {
+        yield return new WaitForSeconds(0.1f);
         int n = 0;
 
         while (true)

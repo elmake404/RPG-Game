@@ -63,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\_Scripts\Editor\NavInspector.cs" />
     <Compile Include="Assets\HeroEditor\Common\Editor\FirearmCollectionEditor.cs" />
     <Compile Include="Assets\HeroEditor\Common\Editor\LayerManagerEditor.cs" />
     <Compile Include="Assets\HeroEditor\Common\Editor\SpriteCollectionEditor.cs" />

@@ -8,7 +8,7 @@ public class NavSurface : MonoBehaviour
     public Graph GraphNav;// граф в котором соеденены все ребра 
     public MapControl Map;
     //[HideInInspector]
-    public List<HexagonControl> ListHexagonControls ;
+    public List<HexagonControl> ListHexagonControls;
 
     private AlgorithmDijkstra _algorithmDijkstra = new AlgorithmDijkstra();
 
@@ -55,7 +55,7 @@ public class NavSurface : MonoBehaviour
                     || (GraphNav[i].NodeHexagon.TypeHexagon == 3 && GraphNav[j].NodeHexagon.gameObject.layer != 10))
                 {
                     IsElevation = false;
-                    if (!NavStatic.CollisionCheck(StartPosition, direction, IsElevation))
+                    if (!NavStatic.CollisionCheck(StartPosition, direction, IsElevation, null, null))
                     {
                         NoRibs = true;
                     }
@@ -63,7 +63,7 @@ public class NavSurface : MonoBehaviour
                 else
                 {
                     IsElevation = true;
-                    if (!NavStatic.CollisionCheckElevation(StartPosition, direction, IsElevation))
+                    if (!NavStatic.CollisionCheckElevation(StartPosition, direction, IsElevation,null,null))
                     {
                         NoRibs = true;
                     }
@@ -74,8 +74,8 @@ public class NavSurface : MonoBehaviour
                     float magnitude = (GraphNav[i].NodeHexagon.transform.position - GraphNav[j].NodeHexagon.transform.position).magnitude;
                     GraphNav[i].Connect(GraphNav[j], magnitude, null);
 
-                    GraphNav[i].NodeHexagon.Data.SaveTheWay(GraphNav[j].NodeHexagon, GraphNav[j].NodeHexagon);
-                    GraphNav[j].NodeHexagon.Data.SaveTheWay(GraphNav[i].NodeHexagon, GraphNav[i].NodeHexagon);
+                    GraphNav[i].NodeHexagon.Data.SaveTheWay(GraphNav[j].NodeHexagon,new List<HexagonControl>() { GraphNav[i].NodeHexagon, GraphNav[j].NodeHexagon });
+                    GraphNav[j].NodeHexagon.Data.SaveTheWay(GraphNav[i].NodeHexagon, new List<HexagonControl>() { GraphNav[j].NodeHexagon, GraphNav[i].NodeHexagon });
                 }
                 else
                 {

@@ -2,23 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyControl : MonoBehaviour
+public class EnemyControl : MonoBehaviour, IControl
 {
     private EnemyManager _enemyManager;
-    private HexagonControl _hexagonTarget;
     [SerializeField]
-    private NavigationBot _navigationBot;
+    private NavAgent _navigationBot;
+    private HexagonControl _hexagonMain;
 
-    private bool _isCatch = false;// true когда герой рядом 
-    private float _timeBetweenAttacks;//выведи потом константу
     [SerializeField]
     private float _healthPoints, _attackPower;
 
     [HideInInspector]
     public Dictionary<int, AnApproacData> AnApproac = new Dictionary<int, AnApproacData>();
 
-    //[HideInInspector]
-    public HexagonControl HexagonMain;
     [HideInInspector]
     public HeroControl HeroTarget;
     [HideInInspector]
@@ -26,23 +22,32 @@ public class EnemyControl : MonoBehaviour
 
     [HideInInspector]
     public bool IsAttack;
-    public IMove ImoveMain;
+    public IMove IMoveMain;
+    public IControl IControlMain;
 
     private void Awake()
     {
-        ImoveMain = _navigationBot;
+        IMoveMain = _navigationBot;
+        IControlMain = this;
+
         for (int i = 0; i < 6; i++)
         {
             AnApproac[i] = new AnApproacData();
         }
+
     }
     private void Start()
     {
         //First();
+        _hexagonMain = MapControl.FieldPosition(gameObject.layer, transform.position);
+        _hexagonMain.Contact(_navigationBot);
+        ////незабудь удалить
+        //transform.position = (Vector2)_hexagonMain.transform.position;
+
+        RecordApproac();
 
     }
-
-    void Update()
+    private void Update()
     {
         if (_healthPoints <= 0)
         {
@@ -50,52 +55,40 @@ public class EnemyControl : MonoBehaviour
             {
                 HeroTarget.RemoveEnemy(this);
             }
-            HexagonMain.Gap();
+            _hexagonMain.Gap();
             Destroy(gameObject);
         }
-
-        RecordApproac();//надо с этим чтото делать 
-
-        // атака
-        //if (HeroTarget != null)
-        //{
-        //    if (HeroPresence())
-        //    {
-        //        if (_timeBetweenAttacks <= 0)
-        //            if (!IsAttack && System.Math.Round(((Vector2)HeroTarget.transform.position - (Vector2)transform.position).magnitude, 2) == 3.46)
-        //            {
-        //                StartCoroutine(Attack());
-        //            }
-        //    }
-        //}
-        //else
-        //{
-        //    _enemyManager.GoalSelection(this);
-        //}
     }
     private void FixedUpdate()
     {
-        if (_timeBetweenAttacks > 0)
+        if (HeroTarget!=null)
         {
-            _timeBetweenAttacks -= Time.deltaTime;
+            if (((Vector2)HeroTarget.transform.position - (Vector2)transform.position).magnitude <= 3.47f)
+            {
+                if (!IsAttack)
+                {
+                    StartCoroutine(Atack());
+                }
+            }
+
+        }
+        else
+        {
+            _enemyManager.GoalSelection(this);
         }
     }
-    private IEnumerator Attack()
+    private IEnumerator Atack()
     {
         IsAttack = true;
-        //_navigationBot.ResetPath();
-        //Debug.Log(1111111111);
-        StartCoroutine(_navigationBot.StopSpeed(0.6f));
-        yield return new WaitForSeconds(0.5f);
         HeroTarget.Damage(_attackPower);
-        _timeBetweenAttacks = 0.2f;
+        _navigationBot.StopSpeedAtack(0.5f);
+        yield return new WaitForSeconds(0.5f);
         IsAttack = false;
-        //_navigationBot.Continue();
     }
     private void RecordApproac()
     {
         bool elevation = gameObject.layer != 8;
-        HexagonControl Hex = HexagonMain;
+        HexagonControl Hex = _hexagonMain;
         HexagonControl hexagon = Hex.Floor != null ? Hex.Floor : Hex;
         //hexagon.Flag();
         for (int i = 0; i < AnApproac.Count; i++)
@@ -105,7 +98,7 @@ public class EnemyControl : MonoBehaviour
 
         if (hexagon.Row != 0)
         {
-            HexagonControl hexagonCon = MapControlStatic.mapNav[hexagon.Row - 1, hexagon.Column].GetHexagonMain(elevation);
+            HexagonControl hexagonCon = MapControl.MapNav[hexagon.Row - 1, hexagon.Column].GetHexagonMain(elevation);
             AnApproac[0].hexagon = hexagonCon;
             if ((hexagonCon != null) && !hexagonCon.IsFree)
             {
@@ -113,9 +106,9 @@ public class EnemyControl : MonoBehaviour
             }
             if ((hexagon.Row % 2) == 0)//1
             {
-                if (hexagon.Column < MapControlStatic.mapNav.GetLength(1) - 1)//2
+                if (hexagon.Column < MapControl.MapNav.GetLength(1) - 1)//2
                 {
-                    HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row - 1, hexagon.Column + 1].GetHexagonMain(elevation);
+                    HexagonControl hexagonControl = MapControl.MapNav[hexagon.Row - 1, hexagon.Column + 1].GetHexagonMain(elevation);
                     AnApproac[1].hexagon = hexagonControl;
                     if ((hexagonControl != null) && !hexagonControl.IsFree)
                     {
@@ -131,7 +124,7 @@ public class EnemyControl : MonoBehaviour
             {
                 if (hexagon.Column > 0)//2
                 {
-                    HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row - 1, hexagon.Column - 1].GetHexagonMain(elevation);
+                    HexagonControl hexagonControl = MapControl.MapNav[hexagon.Row - 1, hexagon.Column - 1].GetHexagonMain(elevation);
 
                     AnApproac[1].hexagon = hexagonControl;
                     if ((hexagonControl != null) && !hexagonControl.IsFree)
@@ -154,7 +147,7 @@ public class EnemyControl : MonoBehaviour
 
         if (hexagon.Column > 0)
         {
-            HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row, hexagon.Column - 1].GetHexagonMain(elevation);
+            HexagonControl hexagonControl = MapControl.MapNav[hexagon.Row, hexagon.Column - 1].GetHexagonMain(elevation);
             AnApproac[2].hexagon = hexagonControl;
             if ((hexagonControl != null) && !hexagonControl.IsFree)
             {
@@ -166,9 +159,9 @@ public class EnemyControl : MonoBehaviour
             AnApproac[2].hexagon = null;
         }
 
-        if (hexagon.Column < MapControlStatic.mapNav.GetLength(1) - 1)
+        if (hexagon.Column < MapControl.MapNav.GetLength(1) - 1)
         {
-            HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row, hexagon.Column + 1].GetHexagonMain(elevation);
+            HexagonControl hexagonControl = MapControl.MapNav[hexagon.Row, hexagon.Column + 1].GetHexagonMain(elevation);
             AnApproac[3].hexagon = hexagonControl;
             if ((hexagonControl != null) && !hexagonControl.IsFree)
             {
@@ -180,9 +173,9 @@ public class EnemyControl : MonoBehaviour
             AnApproac[3].hexagon = null;
         }
 
-        if (hexagon.Row < MapControlStatic.mapNav.GetLength(0) - 1)
+        if (hexagon.Row < MapControl.MapNav.GetLength(0) - 1)
         {
-            HexagonControl hexagonCon = MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column].GetHexagonMain(elevation);
+            HexagonControl hexagonCon = MapControl.MapNav[hexagon.Row + 1, hexagon.Column].GetHexagonMain(elevation);
             AnApproac[4].hexagon = hexagonCon;
             if ((hexagonCon != null) && !hexagonCon.IsFree)
             {
@@ -191,9 +184,9 @@ public class EnemyControl : MonoBehaviour
 
             if ((hexagon.Row % 2) == 0)
             {
-                if (hexagon.Column < MapControlStatic.mapNav.GetLength(1) - 1)//2
+                if (hexagon.Column < MapControl.MapNav.GetLength(1) - 1)//2
                 {
-                    HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column + 1].GetHexagonMain(elevation);
+                    HexagonControl hexagonControl = MapControl.MapNav[hexagon.Row + 1, hexagon.Column + 1].GetHexagonMain(elevation);
                     AnApproac[5].hexagon = hexagonControl;
                     if ((hexagonControl != null) && !hexagonControl.IsFree)
                     {
@@ -209,7 +202,7 @@ public class EnemyControl : MonoBehaviour
             {
                 if (hexagon.Column > 0)//2
                 {
-                    HexagonControl hexagonControl = MapControlStatic.mapNav[hexagon.Row + 1, hexagon.Column - 1].GetHexagonMain(elevation);
+                    HexagonControl hexagonControl = MapControl.MapNav[hexagon.Row + 1, hexagon.Column - 1].GetHexagonMain(elevation);
                     AnApproac[5].hexagon = hexagonControl;
                     if ((hexagonControl != null) && !hexagonControl.IsFree)
                     {
@@ -229,81 +222,20 @@ public class EnemyControl : MonoBehaviour
             AnApproac[5].hexagon = null;
         }
     }
-    public bool HeroPresence()
+    private void CollisionMain(Vector2 NextPos)
     {
-        List<HexagonControl> hexagons = GetSurroundingHexes();
-        for (int i = 0; i < hexagons.Count; i++)
-        {
-            if (hexagons[i].ObjAbove != null)
-            {
-                if (hexagons[i].ObjAbove.GetHero() == HeroTarget)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    private void TravelMessage()
-    {
-        for (int i = 0; i < Pursuer.Count; i++)
-        {
-            Pursuer[i].ReachRheck();
-        }
-    }
-    private void DisConectHero()
-    {
-        _isCatch = false;
-        HeroTarget.RemoveEnemy(this);
-    }
-    private void HeroConnect(HeroControl hero)
-    {
-        _isCatch = true;
-        hero.AddNewEnemy(this);
-        _navigationBot.StartWayHero(hero);
-        HeroTarget = hero;
-    }
+        HexagonControl hex = MapControl.FieldPosition(gameObject.layer, NextPos);
 
-    public void HeroConnect()
-    {
-        _isCatch = true;
-        HeroTarget.AddNewEnemy(this);
-    }
-    public HexagonControl RandomPlace(out int namber)
-    {
-        namber = Random.Range(0, AnApproac.Count);
-
-        while (AnApproac[namber].hexagon == null)
-        {
-            namber = Random.Range(0, AnApproac.Count);
-        }
-        HexagonControl hexagon = AnApproac[namber].hexagon;
-        AnApproac[namber].busy = true;
-        return hexagon;
-    }
-    public bool Collision(Vector2 NextPos, IEnumerator MoveCor)
-    {
-        HexagonControl hex = MapControlStatic.FieldPosition(gameObject.layer, NextPos);
-
-        if (HexagonMain != hex)
+        if (_hexagonMain != hex)
         {
             if (!hex.IsFree)
             {
-                if (hex.ObjAbove.GetHero() != null)
+                if ((HeroTarget != null) && hex.ObjAbove == HeroTarget.IMoveMain)
                 {
-                    if (hex.ObjAbove.GetHero() == HeroTarget)
-                    {
-                        HeroConnect(hex.ObjAbove.GetHero());
-                    }
-                    else
-                    {
-                        DisConectHero();
-                        HeroConnect(hex.ObjAbove.GetHero());
-                    }
+                    _navigationBot.StopMoveTarget();
                 }
                 else
-                    _navigationBot.StopMove(MoveCor);
-                return false;
+                    _navigationBot.StopMove();
             }
             else
             {
@@ -311,30 +243,67 @@ public class EnemyControl : MonoBehaviour
                 {
                     Debug.LogError("da");
                 }
-                HexagonMain.Gap();
-                HexagonMain = hex;
-                HexagonMain.Contact(_navigationBot);
-                RecordApproac();
 
+                _hexagonMain.Gap();
+                _hexagonMain = hex;
+                _hexagonMain.Contact(_navigationBot);
+                RecordApproac();
                 TravelMessage();
-                return true;
             }
         }
-        return true;
     }
-    public void ReachRheck()
+    private void TravelMessage()
     {
-        if (_isCatch)
+        for (int i = 0; i < Pursuer.Count; i++)
         {
-            if (!HeroPresence())
-            {
-                _navigationBot.StartWayHero(HeroTarget);
-            }
+            Pursuer[i].StartWayEnemy(this);
         }
-        else
+    }
+    public void First(EnemyManager manager)
+    {
+        _navigationBot.Control = this;
+        _enemyManager = manager;
+        _hexagonMain = MapControl.FieldPosition(gameObject.layer, transform.position);
+        _hexagonMain.Contact(_navigationBot);
+        RecordApproac();
+    }
+    public void StartWay(HeroControl hero)
+    {
+        _navigationBot.StartWay(hero.IControlMain.HexagonMain(), hero.IMoveMain);
+    }
+    public void AddNewHero(HeroControl hero)
+    {
+        if (Pursuer.IndexOf(hero) == -1)
         {
-            StartWay(HeroTarget.HexagonMain);
+            Pursuer.Add(hero);
         }
+    }
+    public void RemoveHero(HeroControl hero)
+    {
+        Pursuer.Remove(hero);
+    }
+
+    #region Atack
+    public void Damage(float atack)
+    {
+        _healthPoints -= atack;
+    }
+    #endregion
+
+    #region Interface
+    public void Collision(Vector2 next)
+    {
+        CollisionMain(next);
+    }
+
+    public HexagonControl HexagonMain()
+    {
+        return _hexagonMain;
+    }
+
+    public IMove Target()
+    {
+        return HeroTarget.IMoveMain;
     }
     public List<HexagonControl> GetSurroundingHexes()
     {
@@ -347,36 +316,6 @@ public class EnemyControl : MonoBehaviour
         }
         return SurroundingHexes;
     }
-    public void First(EnemyManager enemyManager)
-    {
-        _enemyManager = enemyManager;
-        HexagonMain = MapControlStatic.FieldPosition(gameObject.layer, transform.position);
-        HexagonMain.Contact(_navigationBot);
-        RecordApproac();
-    }
-    public void InitializationHeroTarget(HeroControl hero)
-    {
-        HeroTarget = hero;
-    }
-    public void StartWay(HexagonControl hexagonFinish)
-    {
-        _navigationBot.StartWay(hexagonFinish);
-    }
-    public void AddNewHero(HeroControl hero)
-    {
-        if (Pursuer.IndexOf(hero) == -1)
-        {
-            Pursuer.Add(hero);
-        }
-    }
-    public void Damage(float AttackPower)
-    {
-        _healthPoints -= AttackPower;
-    }
 
-    public void RemoveHero(HeroControl hero)
-    {
-        Pursuer.Remove(hero);
-    }
-
+    #endregion
 }

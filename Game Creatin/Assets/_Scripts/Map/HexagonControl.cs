@@ -10,26 +10,30 @@ public class HexagonControl : MonoBehaviour
     public DataHexNav Data;
     private Dictionary<HexagonControl, List<HexagonControl>> ShortWay = new Dictionary<HexagonControl, List<HexagonControl>>();
 
-    public HexagonControl Elevation, Floor;
-    //[System.NonSerialized]
-    public int Row, Column;
-
     public IMove ObjAbove;// интерфейс стоящего
 
+    public HexagonControl Elevation, Floor;
+    [HideInInspector]
+    public Vector2 position;
+
+    [HideInInspector]
+    public int Row, Column;
     [Range(0, 3)]
     public int TypeHexagon;
-    //[SerializeField]
+    public int layer;
     public bool IsFree = true;
 
     private void Awake()
     {
+        position = transform.position;
+        layer = gameObject.layer;
         if (Elevation != null)
         {
             Elevation.Floor = this;
-            if (MapControlStatic.X == 0 && MapControlStatic.Y == 0)
+            if (MapControl.X == 0 && MapControl.Y == 0)
             {
-                MapControlStatic.X = Elevation.transform.position.x - transform.position.x;
-                MapControlStatic.Y = Elevation.transform.position.y - transform.position.y;
+                MapControl.X = Elevation.transform.position.x - transform.position.x;
+                MapControl.Y = Elevation.transform.position.y - transform.position.y;
             }
         }
         if (TypeHexagon!=1)
@@ -77,7 +81,7 @@ public class HexagonControl : MonoBehaviour
     {
         if (!Elevtion)
         {
-            if (TypeHexagon == 1 || (gameObject.layer == 10))
+            if (TypeHexagon == 1 || (layer == 10))
             {
                 return false;
             }
@@ -92,7 +96,7 @@ public class HexagonControl : MonoBehaviour
             {
                 return true;
             }
-            else if (gameObject.layer != 10)
+            else if (layer != 10)
             {
                 return false;
             }
@@ -147,6 +151,18 @@ public class HexagonControl : MonoBehaviour
             return this;
         }
     }
+    public HexagonControl GetArrayElement()
+    {
+        if (Floor != null)
+        {
+            return Floor;
+        }
+        else
+        {
+            return this;
+        }
+
+    }
     public void NamberHex()
     {
         if (TypeHexagon != 2)
@@ -157,6 +173,7 @@ public class HexagonControl : MonoBehaviour
                 (name);
         }
     }
+
     public void Contact(IMove move)
     {
         IsFree = false;
