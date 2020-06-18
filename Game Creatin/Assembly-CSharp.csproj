@@ -78,6 +78,7 @@
     <Compile Include="Assets\_Scripts\Navigation\NavStatic.cs" />
     <Compile Include="Assets\_Scripts\Navigation\NavSurface.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
+    <Compile Include="Assets\_Scripts\StaticLevelManager.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\AnimationEvents.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\BowShooting.cs" />
     <Compile Include="Assets\HeroEditor\Common\CharacterScripts\Character.cs" />

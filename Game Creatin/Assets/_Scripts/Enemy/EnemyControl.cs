@@ -1,16 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class EnemyControl : MonoBehaviour, IControl
 {
     private EnemyManager _enemyManager;
-    [SerializeField]
-    private NavAgent _navigationBot;
+    //[SerializeField]
+    //private NavAgent _navigationBot;
     private HexagonControl _hexagonMain;
 
     [SerializeField]
-    private float _healthPoints, _attackPower;
+    private float _healthPoints, _attackPower,_atackDistens;
+    private float _atackDistensConst;
 
     [HideInInspector]
     public Dictionary<int, AnApproacData> AnApproac = new Dictionary<int, AnApproacData>();
@@ -27,7 +29,8 @@ public class EnemyControl : MonoBehaviour, IControl
 
     private void Awake()
     {
-        IMoveMain = _navigationBot;
+        _atackDistensConst = (1.73f * (_atackDistens * 2))+0.1f;
+        IMoveMain = GetComponent<IMove>();
         IControlMain = this;
 
         for (int i = 0; i < 6; i++)
@@ -40,7 +43,7 @@ public class EnemyControl : MonoBehaviour, IControl
     {
         //First();
         _hexagonMain = MapControl.FieldPosition(gameObject.layer, transform.position);
-        _hexagonMain.Contact(_navigationBot);
+        _hexagonMain.Contact(IMoveMain);
         ////незабудь удалить
         //transform.position = (Vector2)_hexagonMain.transform.position;
 
@@ -61,27 +64,35 @@ public class EnemyControl : MonoBehaviour, IControl
     }
     private void FixedUpdate()
     {
-        if (HeroTarget!=null)
+        if (StaticLevelManager.IsGameFlove)
         {
-            if (((Vector2)HeroTarget.transform.position - (Vector2)transform.position).magnitude <= 3.47f)
+            if (HeroTarget != null)
             {
-                if (!IsAttack)
+                if (((Vector2)HeroTarget.transform.position - (Vector2)transform.position).magnitude <= _atackDistensConst)
                 {
-                    StartCoroutine(Atack());
-                }
-            }
+                    if (IMoveMain.IsGo())
+                    {
+                        IMoveMain.StopMoveTarget();
+                    }
 
-        }
-        else
-        {
-            _enemyManager.GoalSelection(this);
+                    if (!IsAttack)
+                    {
+                        StartCoroutine(Atack());
+                    }
+                }
+
+            }
+            else
+            {
+                _enemyManager.GoalSelection(this);
+            }
         }
     }
     private IEnumerator Atack()
     {
         IsAttack = true;
         HeroTarget.Damage(_attackPower);
-        _navigationBot.StopSpeedAtack(0.5f);
+        IMoveMain.StopSpeedAtack(0.5f);
         yield return new WaitForSeconds(0.5f);
         IsAttack = false;
     }
@@ -232,10 +243,10 @@ public class EnemyControl : MonoBehaviour, IControl
             {
                 if ((HeroTarget != null) && hex.ObjAbove == HeroTarget.IMoveMain)
                 {
-                    _navigationBot.StopMoveTarget();
+                    IMoveMain.StopMoveTarget();
                 }
                 else
-                    _navigationBot.StopMove();
+                    IMoveMain.StopMove();
             }
             else
             {
@@ -246,7 +257,7 @@ public class EnemyControl : MonoBehaviour, IControl
 
                 _hexagonMain.Gap();
                 _hexagonMain = hex;
-                _hexagonMain.Contact(_navigationBot);
+                _hexagonMain.Contact(IMoveMain);
                 RecordApproac();
                 TravelMessage();
             }
@@ -261,15 +272,15 @@ public class EnemyControl : MonoBehaviour, IControl
     }
     public void First(EnemyManager manager)
     {
-        _navigationBot.Control = this;
+        //_navigationBot.Control = this;
         _enemyManager = manager;
         _hexagonMain = MapControl.FieldPosition(gameObject.layer, transform.position);
-        _hexagonMain.Contact(_navigationBot);
+        _hexagonMain.Contact(IMoveMain);
         RecordApproac();
     }
     public void StartWay(HeroControl hero)
     {
-        _navigationBot.StartWay(hero.IControlMain.HexagonMain(), hero.IMoveMain);
+        IMoveMain.StartWay(hero.IControlMain.HexagonMain(), hero.IMoveMain);
     }
     public void AddNewHero(HeroControl hero)
     {

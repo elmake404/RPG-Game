@@ -6,6 +6,10 @@ public class PlayerControl : MonoBehaviour
 {
     private Camera _camera;
     private HeroControl _heroControl;
+    private void Awake()
+    {
+        StaticLevelManager.IsGameFlove = true;
+    }
     void Start()
     {
         _camera = Camera.main;

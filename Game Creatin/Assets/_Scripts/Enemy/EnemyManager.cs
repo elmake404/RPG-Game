@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
@@ -30,45 +31,6 @@ public class EnemyManager : MonoBehaviour
         else
         {
             Debug.LogError("Incorrect number of units(_maxQuantityEnemy)");
-        }
-    }
-
-    public void GoalSelection(EnemyControl enemy)
-    {
-        if (_listHero.Count != 0)
-        {
-            int namber = Random.Range(0, _listHero.Count);
-            HeroControl hero = _listHero[namber];
-            List<int> NextNamber = new List<int>();
-            NextNamber.Add(namber);
-            //Debug.Log(NextNamber.IndexOf(10));
-            while (hero.CountEnemy() == 0)
-            {
-                if (NextNamber.Count >= 3)
-                {
-                    hero = null;
-                    break;
-                }
-
-                namber = Random.Range(0, _listHero.Count);
-
-                if (NextNamber.IndexOf(namber) != -1)
-                {
-                    continue;
-                }
-
-                hero = _listHero[namber];
-                NextNamber.Add(namber);
-            }
-
-            if (hero == null)
-            {
-                Debug.LogError("No free hero");
-                return;
-            }
-            hero.AddNewEnemy(enemy);
-            enemy.HeroTarget = hero;
-            enemy.StartWay(hero);
         }
     }
     private IEnumerator Production()
@@ -113,6 +75,55 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    private HeroControl GetNearestHero(HexagonControl hexagon)
+    {
+        HeroControl heroControl = null;
+        float Magnitude = float.PositiveInfinity;
+
+        for (int i = 0; i < _listHero.Count; i++)
+        {
+            List<HexagonControl> listHex = new List<HexagonControl>();
+            listHex.AddRange(hexagon.GetWay(_listHero[i].HexagonMain()));
+            float magnitude = 0;
+
+            for (int j = 0; j < listHex.Count - 1; j++)
+            {
+                magnitude += (listHex[j].position - listHex[j+1].position).magnitude;
+            }
+
+            if (Magnitude>magnitude)
+            {
+                Magnitude = magnitude;
+                heroControl = _listHero[i];
+            }
+
+            //Debug.Log(_listHero[i].name);
+            //Debug.Log(magnitude);
+        }
+
+        return heroControl;
+    }
+
+    public void GoalSelection(EnemyControl enemy)
+    {
+        if (_listHero.Count <= 0)
+        {
+            StaticLevelManager.IsGameFlove = false;
+            return;
+        }
+
+        HeroControl hero = GetNearestHero(enemy.HexagonMain());
+
+        if (hero == null)
+        {
+            Debug.LogError("No free hero");
+            return;
+        }
+
+        hero.AddNewEnemy(enemy);
+        enemy.HeroTarget = hero;
+        enemy.StartWay(hero);
+    }
     public void RemoveHero(HeroControl heroControl)
     {
         _listHero.Remove(heroControl);

@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class HeroControl : MonoBehaviour, IControl
 {
-    [SerializeField]
-    private NavAgent _navigationHero;
     private EnemyManager _enemyManager;
     private HexagonControl _hexagonMain;
 
     [SerializeField]
     private int _maxCountEnemy;
     [SerializeField]
-    private float _healthPoints, _attackPower;
+    private float _healthPoints, _attackPower, _atackDistens;
+    private float _atackDistensConst;
 
     public IMove IMoveMain;
     public IControl IControlMain;
@@ -29,8 +28,10 @@ public class HeroControl : MonoBehaviour, IControl
 
     private void Awake()
     {
-        _navigationHero.Control = this;
-        IMoveMain = _navigationHero;
+        _atackDistensConst = (1.73f * (_atackDistens * 2)) + 0.1f;
+
+        //_navigationHero.Control = this;
+        IMoveMain = GetComponent<IMove>();
         IControlMain = this;
     }
     private void Start()
@@ -41,7 +42,7 @@ public class HeroControl : MonoBehaviour, IControl
             AnApproac[i] = new AnApproacData();
         }
         _hexagonMain = MapControl.FieldPosition(gameObject.layer, transform.position);
-        _hexagonMain.Contact(_navigationHero);
+        _hexagonMain.Contact(IMoveMain);
         //незабудь удалить
         transform.position = (Vector2)_hexagonMain.transform.position;
 
@@ -64,8 +65,13 @@ public class HeroControl : MonoBehaviour, IControl
     {
         if (EnemyTarget != null)
         {
-            if (((Vector2)EnemyTarget.transform.position - (Vector2)transform.position).magnitude <= 3.47f)
+            if (((Vector2)EnemyTarget.transform.position - (Vector2)transform.position).magnitude <= _atackDistensConst)
             {
+                if (IMoveMain.IsGo())
+                {
+                    IMoveMain.StopMoveTarget();
+                }
+
                 if (!IsAttack)
                 {
                     StartCoroutine(Atack());
@@ -77,11 +83,10 @@ public class HeroControl : MonoBehaviour, IControl
     {
         IsAttack = true;
         EnemyTarget.Damage(_attackPower);
-        _navigationHero.StopSpeedAtack(0.5f);
+        IMoveMain.StopSpeedAtack(0.5f);
         yield return new WaitForSeconds(0.5f);
         IsAttack = false;
     }
-
     private void RecordApproac()
     {
         bool elevation = gameObject.layer != 8;
@@ -229,10 +234,10 @@ public class HeroControl : MonoBehaviour, IControl
             {
                 if ((EnemyTarget != null) && hex.ObjAbove == EnemyTarget.IMoveMain)
                 {
-                    _navigationHero.StopMoveTarget();
+                    IMoveMain.StopMoveTarget();
                 }
                 else
-                    _navigationHero.StopMove();
+                    IMoveMain.StopMove();
             }
             else
             {
@@ -243,7 +248,7 @@ public class HeroControl : MonoBehaviour, IControl
 
                 _hexagonMain.Gap();
                 _hexagonMain = hex;
-                _hexagonMain.Contact(_navigationHero);
+                _hexagonMain.Contact(IMoveMain);
                 RecordApproac();
                 TravelMessage();
             }
@@ -268,11 +273,11 @@ public class HeroControl : MonoBehaviour, IControl
     {
         EnemyTarget = enemy;
         enemy.AddNewHero(this);
-        _navigationHero.StartWay(enemy.IControlMain.HexagonMain(), enemy.IMoveMain);
+        IMoveMain.StartWay(enemy.IControlMain.HexagonMain(), enemy.IMoveMain);
     }
     public void StartWay(HexagonControl hexagonFinish)
     {
-        _navigationHero.StartWay(hexagonFinish, null);
+        IMoveMain.StartWay(hexagonFinish, null);
     }
     public void Initialization(EnemyManager enemyManager)
     {
