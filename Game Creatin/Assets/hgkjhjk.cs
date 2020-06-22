@@ -14,12 +14,9 @@ public class hgkjhjk : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Vector2 y = MapControl.MapNav[1, 14].transform.position;
-            ////Vector2 y = MapControlStatic.mapNav[5, 11].transform.position;
-            //Vector2 y = MapControlStatic.mapNav[2, 14].transform.position;
-            ////Vector2 y = MapControlStatic.mapNav[2, 5].transform.position;
+            Vector2 y = MapControl.MapNav[5, 13].transform.position;
+
             transform.position = Vector2.MoveTowards(transform.position, y, 0.4f);
-            ////MapControlStatic.GetPositionOnTheMap(transform.position).Flag();
 
             HexagonControl[] controls = null;
             controls = MapControl.GetPositionOnTheMap(y, transform.position);

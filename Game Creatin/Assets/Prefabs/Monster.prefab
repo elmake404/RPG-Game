@@ -51,6 +51,7 @@ MonoBehaviour:
   _healthPoints: 5
   _attackPower: 1
   _atackDistens: 1
+  AnApproac: []
   HeroTarget: {fileID: 0}
   Pursuer: []
   IsAttack: 0
@@ -118,10 +119,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d289ac19d188d824781f479ae1822106, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isFlying: 0
   _isMove: 0
   _isClever: 0
-  _speed: 0.25
+  _speed: 0.1
 --- !u!1 &5252100088159651508
 GameObject:
   m_ObjectHideFlags: 0

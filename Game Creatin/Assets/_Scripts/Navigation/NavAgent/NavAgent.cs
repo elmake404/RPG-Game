@@ -7,7 +7,7 @@ public class NavAgent : MonoBehaviour, IMove
 {
     private List<HexagonControl> _wayList = new List<HexagonControl>();
     private HexagonControl _targetHexagon;
-    private Vector2 _currentPos;
+    private HexagonControl _currentPos;
 
     [SerializeField]
     private bool _isMove, _isClever;
@@ -47,9 +47,9 @@ public class NavAgent : MonoBehaviour, IMove
 
                 transform.position = Vector2.MoveTowards(transform.position, _targetHexagon.transform.position, _speedMove);
 
-                _currentPos = (Vector2)transform.position + (Vector2)(_targetHexagon.transform.position - transform.position).normalized * 1.8f;
+                Vector2 NextPos = (Vector2)transform.position + (Vector2)(_targetHexagon.transform.position - transform.position).normalized * 1.8f;
 
-                Control.Collision(_currentPos);
+                Control.Collision(NextPos);
 
                 if (_wayList.Count > 0)
                 {
@@ -70,11 +70,10 @@ public class NavAgent : MonoBehaviour, IMove
                 {
                     if (_wayList.Count > 0)
                     {
-                        HexagonControl hexagonNext = MapControl.FieldPosition(gameObject.layer, _currentPos);
-                        IMove move = hexagonNext.ObjAbove;
+                        IMove move = _currentPos.ObjAbove;
                         if ((move == null))
                         {
-                            if (hexagonNext.IsFree)
+                            if (_currentPos.IsFree)
                             {
                                 _isMove = true;
                             }
@@ -82,7 +81,7 @@ public class NavAgent : MonoBehaviour, IMove
                         else if (!move.IsGo())
                         {
                             IMove enemy = Control.Target() != null ? Control.Target() : null;
-                            WayBypass(_wayList[_wayList.Count - 1], enemy, hexagonNext.ObjAbove);
+                            WayBypass(_wayList[_wayList.Count - 1], enemy, _currentPos.ObjAbove);
                         }
                     }
                 }
@@ -139,7 +138,7 @@ public class NavAgent : MonoBehaviour, IMove
 
         if (Way != null)
         {
-            Way = NavStatic.PathCheckBypass(Way, Collision, EnemyTarget);
+            Way = NavStatic.PathCheckBypass(Way, Collision, EnemyTarget, this);
 
             if (Way.Count > 0)
             {
@@ -157,15 +156,16 @@ public class NavAgent : MonoBehaviour, IMove
     }
 
     #region interface 
-    public /*async*/ void StartWay(HexagonControl hexagonFinish, IMove EnemyTarget)
+    public async void StartWay(HexagonControl hexagonFinish, IMove EnemyTarget)
     {
         _wayList.Clear();
 
-        /*await Task.Run(() =>*/
-        Way(hexagonFinish, EnemyTarget)/*)*/;
+        await Task.Run(() =>
+        Way(hexagonFinish, EnemyTarget));
     }
-    public void StopMove()
+    public void StopMove(HexagonControl CollcionHex)
     {
+        _currentPos = CollcionHex;
         _isMove = false;
     }
     public void StopMoveTarget()
@@ -178,20 +178,22 @@ public class NavAgent : MonoBehaviour, IMove
         StopMoveTarget();
         StartCoroutine(StopSpeed(timeStop));
     }
-
     public bool IsGo()
     {
         return _isMove;
     }
-
     public EnemyControl GetEnemy()
     {
         return null;
     }
-
     public List<HexagonControl> GetSurroundingHexes()
     {
         return Control.GetSurroundingHexes();
+    }
+
+    public bool IsFlight()
+    {
+        return false;
     }
     #endregion
 }

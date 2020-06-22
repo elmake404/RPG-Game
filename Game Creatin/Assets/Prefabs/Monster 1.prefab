@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2822881598915167576}
   - component: {fileID: 7993630380409840971}
   - component: {fileID: 8357822781207716668}
-  - component: {fileID: 156550093309529522}
+  - component: {fileID: 7964117968273122418}
   m_Layer: 8
   m_Name: Monster 1
   m_TagString: Enemy
@@ -51,6 +51,7 @@ MonoBehaviour:
   _healthPoints: 5
   _attackPower: 1
   _atackDistens: 1
+  AnApproac: []
   HeroTarget: {fileID: 0}
   Pursuer: []
   IsAttack: 0
@@ -106,7 +107,7 @@ PolygonCollider2D:
       - {x: 0, y: -2}
       - {x: -1.73, y: -1}
       - {x: -1.73, y: 1}
---- !u!114 &156550093309529522
+--- !u!114 &7964117968273122418
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,13 +116,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1987900913563013769}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d289ac19d188d824781f479ae1822106, type: 3}
+  m_Script: {fileID: 11500000, guid: b493b13fdc2ebf0468cf892747ba4bc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isFlying: 0
-  _isMove: 0
-  _isClever: 0
-  _speed: 0.25
+  _speed: 0.12
+  hg: 0
 --- !u!1 &5252100088159651508
 GameObject:
   m_ObjectHideFlags: 0
@@ -213,6 +212,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: hotpng.com
+      objectReference: {fileID: 0}
+    - target: {fileID: 2601004837617441037, guid: db8c8c1b61f77ec44acc2acd9cf8d759,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5429037907966570273, guid: db8c8c1b61f77ec44acc2acd9cf8d759,
         type: 3}

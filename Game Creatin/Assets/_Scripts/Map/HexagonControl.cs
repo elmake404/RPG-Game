@@ -11,6 +11,7 @@ public class HexagonControl : MonoBehaviour
     private Dictionary<HexagonControl, List<HexagonControl>> ShortWay = new Dictionary<HexagonControl, List<HexagonControl>>();
 
     public IMove ObjAbove;// интерфейс стоящего
+    public IMove ObjAboveFly;
 
     public HexagonControl Elevation, Floor;
     [HideInInspector]
@@ -22,6 +23,7 @@ public class HexagonControl : MonoBehaviour
     public int TypeHexagon;
     public int layer;
     public bool IsFree = true;
+    public bool IsFreeFly = true;
 
     private void Awake()
     {
@@ -173,12 +175,34 @@ public class HexagonControl : MonoBehaviour
                 (name);
         }
     }
+    public bool GetFree(bool isFly)
+    {
+        if (isFly)
+        {
+            return IsFreeFly;
+        }
+        else
+        {
+            return IsFree;
+        }
+    }
+    public void ContactFly(IMove move)
+    {
+        IsFreeFly = false;
 
+        ObjAboveFly = move;
+    }
     public void Contact(IMove move)
     {
         IsFree = false;
 
         ObjAbove = move;
+    }
+    public void GapFly()
+    {
+        IsFreeFly = true;
+
+        ObjAboveFly = null;
     }
     public void Gap()
     {
@@ -186,7 +210,6 @@ public class HexagonControl : MonoBehaviour
 
         ObjAbove = null;
     }
-
     public void CheckDataComponent()
     {
         var Data = GetComponent<DataHexNav>();

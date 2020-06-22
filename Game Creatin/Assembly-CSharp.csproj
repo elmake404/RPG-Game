@@ -63,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\_Scripts\Bottom.cs" />
     <Compile Include="Assets\_Scripts\Computation\AlgorithmDijkstra.cs" />
     <Compile Include="Assets\_Scripts\Computation\AnApproacData.cs" />
     <Compile Include="Assets\_Scripts\Computation\Graph.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Assets\_Scripts\Map\MapControl.cs" />
     <Compile Include="Assets\_Scripts\Navigation\DataHexNav.cs" />
     <Compile Include="Assets\_Scripts\Navigation\NavAgent\NavAgent.cs" />
+    <Compile Include="Assets\_Scripts\Navigation\NavAgent\NavAgentFly.cs" />
     <Compile Include="Assets\_Scripts\Navigation\NavStatic.cs" />
     <Compile Include="Assets\_Scripts\Navigation\NavSurface.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />

@@ -24,7 +24,7 @@ public class PlayerControl : MonoBehaviour
             {
                 if (Collider.gameObject.tag == "Hero")
                 {
-                    _heroControl = Collider.gameObject.GetComponent<HeroControl>();
+                    _heroControl = Collider.gameObject.GetComponentInParent<HeroControl>();
                 }
             }
         }

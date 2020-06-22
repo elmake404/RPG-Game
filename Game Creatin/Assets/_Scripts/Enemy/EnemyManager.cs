@@ -6,25 +6,44 @@ using UnityEngine;
 public class EnemyManager : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _enemy;
+    private GameObject _ground, _flying, _arrows;
     [SerializeField]
     private Transform[] _spawnPoint;
+    private List<string> _enemyControls = new List<string>();
     [SerializeField]
     private List<HeroControl> _listHero = new List<HeroControl>();
     private List<EnemyControl> _listEnemyControls = new List<EnemyControl>();
+    private Dictionary<string, GameObject> _enemies = new Dictionary<string, GameObject>();
+    private Dictionary<string, int> _enemiesCount = new Dictionary<string, int>();
 
     [SerializeField]
-    private int _maxQuantityEnemy;
+    [Range(0, 100)]
+    private int _maxQuantityGround, _maxQuantitFlying, _maxQuantityArrows;
     private int _namberPointSpawn = 0;
 
     void Start()
     {
+        _enemies["flying"] = _flying;
+        _enemies["arrows"] = _arrows;
+        _enemies["ground"] = _ground;
+
+        _enemiesCount["flying"] = _maxQuantitFlying;
+        _enemiesCount["arrows"] = _maxQuantityArrows;
+        _enemiesCount["ground"] = _maxQuantityGround;
+
+        if (_maxQuantitFlying > 0)
+            _enemyControls.Add("flying");
+        if (_maxQuantityArrows > 0)
+            _enemyControls.Add("arrows");
+        if (_maxQuantityGround > 0)
+            _enemyControls.Add("ground");
+
         foreach (var item in _listHero)
         {
             item.Initialization(this);
         }
 
-        if (_maxQuantityEnemy > 0)
+        if (_enemyControls.Count>0)
         {
             StartCoroutine(Production());
         }
@@ -44,13 +63,19 @@ public class EnemyManager : MonoBehaviour
             {
                 n++;
 
-                if (_maxQuantityEnemy != 0)
+                if (_enemyControls.Count > 0)
                 {
-                    _maxQuantityEnemy--;
-                    EnemyControl Enemy = Instantiate(_enemy, _spawnPoint[_namberPointSpawn].position, Quaternion.identity).GetComponent<EnemyControl>();
-                    Enemy.gameObject.name = n.ToString();
+                    string name = _enemyControls[Random.Range(0, _enemyControls.Count)];
+
+                    EnemyControl Enemy = Instantiate(_enemies[name], _spawnPoint[_namberPointSpawn].position, Quaternion.identity).GetComponent<EnemyControl>();
+                    Enemy.gameObject.name = name;
+                    _enemiesCount[name]--;
+                    if (_enemiesCount[name]<=0)
+                    {
+                        _enemyControls.Remove(name);
+                    }
                     Enemy.First(this);
-                    GoalSelection(Enemy);
+                    GoalSelection(Enemy,name);
 
                     if (_namberPointSpawn != _spawnPoint.Length - 1)
                     {
@@ -64,7 +89,7 @@ public class EnemyManager : MonoBehaviour
 
                 yield return new WaitForSeconds(0.5f);
             }
-            if (_maxQuantityEnemy != 0)
+            if (_enemyControls.Count != 0)
             {
                 yield return new WaitForSeconds(1f);
             }
@@ -74,7 +99,6 @@ public class EnemyManager : MonoBehaviour
             }
         }
     }
-
     private HeroControl GetNearestHero(HexagonControl hexagon)
     {
         HeroControl heroControl = null;
@@ -88,31 +112,52 @@ public class EnemyManager : MonoBehaviour
 
             for (int j = 0; j < listHex.Count - 1; j++)
             {
-                magnitude += (listHex[j].position - listHex[j+1].position).magnitude;
+                magnitude += (listHex[j].position - listHex[j + 1].position).magnitude;
             }
 
-            if (Magnitude>magnitude)
+            if (Magnitude > magnitude)
             {
                 Magnitude = magnitude;
                 heroControl = _listHero[i];
             }
-
-            //Debug.Log(_listHero[i].name);
-            //Debug.Log(magnitude);
         }
-
         return heroControl;
     }
+    private HeroControl GetNearestHeroMag(HexagonControl hexagon)
+    {
+        HeroControl heroControl = null;
+        float Magnitude = float.PositiveInfinity;
 
-    public void GoalSelection(EnemyControl enemy)
+        for (int i = 0; i < _listHero.Count; i++)
+        {
+            float magnitude = 0;
+
+            magnitude += (hexagon.position - (Vector2)_listHero[i].transform.position).magnitude;
+
+            if (Magnitude > magnitude)
+            {
+                Magnitude = magnitude;
+                heroControl = _listHero[i];
+            }
+        }
+        return heroControl;
+    }
+    public void GoalSelection(EnemyControl enemy,string name)
     {
         if (_listHero.Count <= 0)
         {
             StaticLevelManager.IsGameFlove = false;
             return;
         }
-
-        HeroControl hero = GetNearestHero(enemy.HexagonMain());
+        HeroControl hero;
+        if (name== "ground")
+        {
+            hero = GetNearestHero(enemy.HexagonMain());
+        }
+        else
+        {
+            hero = GetNearestHeroMag(enemy.HexagonMain());
+        }
 
         if (hero == null)
         {
